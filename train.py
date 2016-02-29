@@ -114,23 +114,27 @@ def train(args, training_ds):
     """
     # Build a feed-forward network with x hidden units
     if args['verbose']:
-        print('Building network...')
+        print('\nBuilding network...')
     ff_network = buildNetwork(training_ds.indim, args['hidden'],
                               training_ds.outdim)
     if args['verbose']:
         print('Network built.')
 
     # Train using user-specified method and training data for n epochs
-    if args['verbose']:
-        print('Training network...')
-    trainer = TRAIN_METHODS[args['method']](ff_network, dataset=training_ds,
-                                            verbose=args['verbose'])
     batch_size = args['batch_size']
     max_epochs = args['epochs']
-    for i in range(0, max_epochs, batch_size):
-        if args['verbose']:
-            print('Training batch {0} of {1}.'.format(i, max_epochs))
-        trainer.trainEpochs(batch_size)
+
+    if args['verbose']:
+        print('\nTraining network for {0} epochs in batches of {1}...'
+              .format(max_epochs, batch_size))
+    trainer = TRAIN_METHODS[args['method']](ff_network, dataset=training_ds,
+                                            verbose=args['verbose'])
+
+    try:
+        for i in range(0, max_epochs, batch_size):
+            trainer.trainEpochs(batch_size)
+    except (KeyboardInterrupt, EOFError):
+        pass
 
     return trainer
 
@@ -138,14 +142,14 @@ def train(args, training_ds):
 def evaluate(args, trainer, training_ds, testing_ds):
     """Use the trainer to evaluate the network on the training and test data"""
     if args['verbose']:
-        print('Evaluating the network...')
+        print('\nEvaluating the network...')
+    print('Total epochs: %4d' % trainer.totalepochs)
     training_result = percentError(trainer.testOnClassData(),
-                                   training_ds['class'])
+                                   training_ds)
+    print('Training error: %5.2f%%' % training_result)
     testing_result = percentError(trainer.testOnClassData(dataset=testing_ds),
-                                  testing_ds['class'])
-    print("epoch: %4d" % trainer.totalepochs)
-    print("train error: %5.2f%%" % training_result)
-    print("test error: %5.2f%%" % testing_result)
+                                  testing_ds)
+    print('Testing error: %5.2f%%' % testing_result)
 
 
 def command_line_runner():
