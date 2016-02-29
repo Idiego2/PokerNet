@@ -2,7 +2,7 @@
 
 ## Predicting poker hand's strength with artificial neural networks in Python
 
-Based off the similarly titled study ["Predicting Poker Hand's Strength With Artificial Neural Networks"](bit.ly/1RecknH) by Gökay Dişken from Adana STU, PokerNet is a Python-based and undergraduate-led mimic study and final Artificial Intelligence project.
+Based off the similarly titled study ["Predicting Poker Hand's Strength With Artificial Neural Networks"](bit.ly/1RecknH) by Gökay Dişken from Adana STU, PokerNet is a Python-based and undergraduate-led near identical study and final Artificial Intelligence project.
 
 ## Abstract
 
@@ -19,5 +19,7 @@ To be posted
 ## Contributors
 
 Hunter Hammond
+
 Jacob Newberry
+
 Chris Watanabe
