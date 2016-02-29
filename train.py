@@ -15,9 +15,10 @@ TRAIN_METHODS = {'rprop': RPropMinusTrainer,
 
 
 def get_parser():
-    parser = Parser(description="Train neural network to classify poker hands")
+    """Parse command-line arguments"""
+    parser = Parser(description='Train neural network to classify poker hands')
     parser.add_argument('-bs', '--batch-size', type=int, nargs='?', default=5,
-                        help='size of training batches'),
+                        help='size of training batches')
     parser.add_argument('-e', '--epochs', help='# of training iterations',
                         type=int, nargs='?', default=100)
     parser.add_argument('-hu', '--hidden', help='# of hidden units',
@@ -39,7 +40,7 @@ def preprocess_load_data(loaded_lines):
         vec[int(num)] = 1
         return vec
 
-    input_data = [] 
+    input_data = []
     target_data = []
     for line in loaded_lines:
         input_data.append([int(x) for x in line[:-1]])
@@ -104,15 +105,14 @@ def load_data(args):
     return load_training_data(args), load_testing_data(args)
 
 
-def train(args, training_ds, training_method):
+def train(args, training_ds):
     """Build and train feed-forward neural network
 
        Keyword arguments:
        args -- program arguments (dict)
        training_ds -- suit, ranks, and target hands (SupervisedDataSet)
-       training_method -- supervised learning method (str)
     """
-    # Build a feed-forward network with x hidden units 
+    # Build a feed-forward network with x hidden units
     if args['verbose']:
         print('Building network...')
     ff_network = buildNetwork(training_ds.indim, args['hidden'],
@@ -140,7 +140,7 @@ def evaluate(trainer, training_ds, testing_ds):
     training_result = percentError(trainer.testOnClassData(),
                                    training_ds['class'])
     testing_result = percentError(trainer.testOnClassData(dataset=testing_ds),
-                                   training_ds['class'])
+                                  training_ds['class'])
     print("epoch: %4d" % trainer.totalepochs)
     print("train error: %5.2f%%" % training_result)
     print("test error: %5.2f%%" % testing_result)
@@ -159,7 +159,6 @@ def command_line_runner():
 
     # Use the trainer to evaluate the network on the training and test data
     evaluate(trainer, training_ds, testing_ds)
-
 
 
 if __name__ == '__main__':
