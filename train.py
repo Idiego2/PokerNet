@@ -135,12 +135,14 @@ def train(args, training_ds):
     return trainer
 
 
-def evaluate(trainer, training_ds, testing_ds):
+def evaluate(args, trainer, training_ds, testing_ds):
     """Use the trainer to evaluate the network on the training and test data"""
+    if args['verbose']:
+        print('Evaluating the network...')
     training_result = percentError(trainer.testOnClassData(),
                                    training_ds['class'])
     testing_result = percentError(trainer.testOnClassData(dataset=testing_ds),
-                                  training_ds['class'])
+                                  testing_ds['class'])
     print("epoch: %4d" % trainer.totalepochs)
     print("train error: %5.2f%%" % training_result)
     print("test error: %5.2f%%" % testing_result)
@@ -155,10 +157,10 @@ def command_line_runner():
     training_ds, testing_ds = load_data(args)
 
     # Build and train feed-forward neural network
-    trainer = train(args, training_ds, args['method'])
+    trainer = train(args, training_ds)
 
     # Use the trainer to evaluate the network on the training and test data
-    evaluate(trainer, training_ds, testing_ds)
+    evaluate(args, trainer, training_ds, testing_ds)
 
 
 if __name__ == '__main__':
