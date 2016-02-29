@@ -20,7 +20,7 @@ def get_parser():
     parser.add_argument('-bs', '--batch-size', type=int, nargs='?', default=5,
                         help='size of training batches')
     parser.add_argument('-e', '--epochs', help='# of training iterations',
-                        type=int, nargs='?', default=100)
+                        type=int, nargs='?', default=1000)
     parser.add_argument('-hu', '--hidden', help='# of hidden units',
                         type=int, nargs='?', default=10)
     parser.add_argument('-m', '--method', help='training method',
@@ -122,11 +122,11 @@ def train(args, training_ds):
 
     # Train using user-specified method and training data for n epochs
     batch_size = args['batch_size']
-    max_epochs = args['epochs']
+    max_epochs = args['epochs'] / batch_size
 
     if args['verbose']:
-        print('\nTraining network for {0} epochs in batches of {1}...'
-              .format(max_epochs, batch_size))
+        print('\nTraining network for {0} total epochs, batch size of {1}...'
+              .format(max_epochs * batch_size, batch_size))
     trainer = TRAIN_METHODS[args['method']](ff_network, dataset=training_ds,
                                             verbose=args['verbose'])
 
