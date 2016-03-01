@@ -17,16 +17,14 @@ TRAIN_METHODS = {'rprop': RPropMinusTrainer,
 def get_parser():
     """Parse command-line arguments"""
     parser = Parser(description='Train neural network to classify poker hands')
-    parser.add_argument('-bs', '--batch-size', type=int, nargs='?', default=5,
-                        help='size of training batches')
-    parser.add_argument('-e', '--epochs', help='# of training iterations',
-                        type=int, nargs='?', default=1000)
-    parser.add_argument('-hu', '--hidden', help='# of hidden units',
-                        type=int, nargs='?', default=10)
-    parser.add_argument('-m', '--method', help='training method',
-                        type=str, nargs='?', default='rprop')
-    parser.add_argument('-nt', '--num-testing', help='# of testing inputs',
-                        type=int, nargs='?', default='25000')
+    parser.add_argument('-e', '--epochs', type=int, nargs='?', default=1000,
+                        help='# of training iterations (default: 1000)')
+    parser.add_argument('-hu', '--hidden', type=int, nargs='?', default=10, 
+                        help='# of hidden units (default: 10)')
+    parser.add_argument('-m', '--method', type=str, nargs='?', default='rprop',
+                        help='training method (default: rprop)')
+    parser.add_argument('-nt', '--num-testing', type=int, nargs='?', default='25000',
+                        help='# of testing inputs (default: 25000')
     parser.add_argument('-v', '--verbose', help='print status messages',
                         action='store_true')
     return parser
@@ -48,18 +46,13 @@ def train(args, training_ds):
         print('Network built.')
 
     # Train using user-specified method and training data for n epochs
-    batch_size = args['batch_size']
-    max_epochs = args['epochs'] / batch_size
-
     if args['verbose']:
-        print('\nTraining network for {0} total epochs, batch size of {1}...'
-              .format(max_epochs * batch_size, batch_size))
+        print('\nTraining network for {0} epochs...'.format(args['epochs']))
     trainer = TRAIN_METHODS[args['method']](ff_network, dataset=training_ds,
                                             verbose=args['verbose'])
 
     try:
-        for i in xrange(0, max_epochs, batch_size):
-            trainer.trainEpochs(batch_size)
+        trainer.trainEpochs(args['epochs'])
     except (KeyboardInterrupt, EOFError):
         pass
 
@@ -71,10 +64,10 @@ def evaluate(args, trainer, training_ds, testing_ds):
     if args['verbose']:
         print('\nEvaluating the network...')
     print('Total epochs: %4d' % trainer.totalepochs)
-    training_result = percentError(trainer.testOnClassData(),
+    training_result = percentError(trainer.testOnClassData(training_ds),
                                    training_ds)
     print('Training error: %5.2f%%' % training_result)
-    testing_result = percentError(trainer.testOnClassData(dataset=testing_ds),
+    testing_result = percentError(trainer.testOnClassData(testing_ds),
                                   testing_ds)
     print('Testing error: %5.2f%%' % testing_result)
 
