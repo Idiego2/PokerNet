@@ -5,32 +5,51 @@ from __future__ import absolute_import, print_function
 from argparse import ArgumentParser as Parser
 from itertools import izip
 
-from pybrain.tools.shortcuts import buildNetwork
-from pybrain.tools.validation import Validator
-from pybrain.supervised.trainers import RPropMinusTrainer, BackpropTrainer
+import numpy as np
 
 from load import load_data
+from activation_functions import tanh_function, sigmoid_function
+from neuralnet import NeuralNet
 
 
-def rp_trainer(*a, **kw):
-    """Resilient back-propagation trainer"""
-    return RPropMinusTrainer(*a, **kw)
-
-
-def gdm_trainer(*a, **kw):
+def gdm_trainer(ff_network, training_ds, max_iterations, learning_rate,
+                momentum_factor):
     """Gradient descent with momentum trainer which uses back-propagation"""
-    if kw['momentum'] == 0:
+    if momentum_factor == 0:
         raise ValueError('You must set the momentum for gradient descent!')
-    return BackpropTrainer(*a, **kw)
+    return ff_network.backpropagation(training_ds,
+                                      max_iterations=max_iterations,
+                                      learning_rate=learning_rate,
+                                      momentum_factor=momentum_factor)
 
 
-TRAIN_METHODS = {'rp': rp_trainer,
-                 'gdm': gdm_trainer,}
+def scg_trainer(ff_network, training_ds, max_iterations, learning_rate,
+                momentum_factor):
+    """Scaled conjugate gradient trainer"""
+    return ff_network.scg(training_ds, max_iterations=max_iterations)
+
+
+def rp_trainer(ff_network, training_ds, max_iterations, learning_rate,
+               momentum_factor):
+    """Resilient back-propagation trainer"""
+    return ff_network.resilient_backpropagation(training_ds,
+                                                max_iterations=max_iterations)
+
+
+TRAIN_METHODS = {'gdm': gdm_trainer,
+                 'scg': scg_trainer,
+                 'rp': rp_trainer}
+
+ACTIVATION_FNS = {'tanh': tanh_function,
+                  'sigmoid': sigmoid_function}
 
 
 def get_parser():
     """Parse command-line arguments"""
     parser = Parser(description='Train neural network to classify poker hands')
+    parser.add_argument('-a', '--activation', type=str,
+                        nargs='?', default='sigmoid',
+                        help='how to define node output (default: sigmoid)')
     parser.add_argument('-e', '--epochs', type=int, nargs='?', default=1000,
                         help='# of training iterations (default: 1000)')
     parser.add_argument('-hi', '--hidden', type=int, nargs='?', default=10,
@@ -55,17 +74,24 @@ def train(args, training_ds):
 
        Keyword arguments:
        args -- program arguments (dict)
-       training_ds -- suit, ranks, and target hands (SupervisedDataSet)
+       training_ds -- suit, ranks, and target hands (list)
     """
     # Build a feed-forward network with x hidden units
+    feature_dim = len(training_ds[0].features)
+    target_dim = len(training_ds[0].targets)
+    settings = {"n_inputs": feature_dim,
+                "layers": [(feature_dim + target_dim + args['hidden'],
+                            tanh_function),
+                           (target_dim, ACTIVATION_FNS[args['activation']])]}
+
     if args['verbose']:
         print('\nBuilding network:')
-        print('\tinput neurons: {}'.format(training_ds.indim))
+        print('\tinput neurons: {}'.format(feature_dim))
         print('\thidden neurons: {}'.format(args['hidden']))
-        print('\toutput neurons: {}'.format(training_ds.outdim))
+        print('\toutput neurons: {}'.format(target_dim))
 
-    ff_network = buildNetwork(training_ds.indim, args['hidden'],
-                              training_ds.outdim)
+    ff_network = NeuralNet(settings)
+
     if args['verbose']:
         print('Network built.')
 
@@ -76,40 +102,28 @@ def train(args, training_ds):
         print('\tmethod: {}'.format(args['method']))
         print('\tmomentum: {}'.format(args['momentum']))
         print('\tlearning rate: {}'.format(args['learning_rate']))
-
-    trainer = TRAIN_METHODS[args['method']](ff_network, dataset=training_ds,
-                                            verbose=args['verbose'],
-                                            momentum=args['momentum'],
-                                            learningrate=args['learning_rate'])
-
+    
     try:
-        trainer.trainEpochs(args['epochs'])
+        TRAIN_METHODS[args['method']](ff_network, training_ds,
+                                      max_iterations=args['epochs'],
+                                      learning_rate=args['learning_rate'],
+                                      momentum_factor=args['momentum'])
     except (KeyboardInterrupt, EOFError):
         pass
 
-    return trainer, ff_network
+    return ff_network
 
 
-def evaluate(args, trainer, ff_network, training_ds, testing_ds):
-    """Evaluate the networks hit rate and MSE on training and testing"""
+def evaluate(args, ff_network, training_ds, testing_ds):
+    """Evaluate the networks overall results and MSE on training and testing"""
     if args['verbose']:
-        print('\nEvaluating the networks hit rate and MSE:')
-    print('\tTotal epochs: %4d' % trainer.totalepochs)
+        print('\nEvaluating the networks overall results and MSE:')
 
     def print_dataset_eval(dataset):
-        """Print dataset hit rate and MSE"""
-        predicted = [ff_network.activate(x) for x in dataset['input']]
-        hits = 0
-        mse = 0
-
-        for pred, targ in izip(predicted, dataset['target']):
-            hits += Validator.classificationPerformance(pred, targ)
-            mse += Validator.MSE(pred, targ)
-        total_hits = hits / len(predicted)
-        total_mse = mse / len(predicted)
-
-        print('\t\tHit rate: {}'.format(total_hits))
-        print('\t\tMSE: {}'.format(total_mse))
+        """Evalute and print networks overall results and MSE for a dataset"""
+        overall_results, mse = ff_network.test(dataset)
+        print('\t\tOverall results: {}'.format(overall_results))
+        print('\t\tMSE: {}'.format(mse))
 
     print('\n\tTraining set:')
     print_dataset_eval(training_ds)
@@ -124,10 +138,10 @@ def run_simulation(args):
     training_ds, testing_ds = load_data(args)
 
     # Build and train feed-forward neural network
-    trainer, ff_network = train(args, training_ds)
+    ff_network = train(args, training_ds)
 
     # Use the trainer to evaluate the network on the training and test data
-    evaluate(args, trainer, ff_network, training_ds, testing_ds)
+    evaluate(args, ff_network, training_ds, testing_ds)
 
 
 def command_line_runner():

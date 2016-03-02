@@ -1,9 +1,9 @@
 """Load and preprocess poker testing and training datasets"""
 
-from __future__ import print_function
+from __future__ import absolute_import, print_function
 from itertools import izip
 
-from pybrain.datasets import SupervisedDataSet
+from tools import Instance
 
 
 def preprocess_load_data(loaded_lines):
@@ -27,15 +27,13 @@ def preprocess_load_data(loaded_lines):
 
 
 def build_dataset(args, input_data, target_data):
-    """Build SupervisedDataSet by adding data samples
+    """Build datasets as lists of Instances
 
        Keyword arguments:
        input_data -- suit and rank combinations (list)
        target_data -- different poker hands (list)
     """
-    dataset = SupervisedDataSet(len(input_data[0]), len(target_data[0]))
-    for in_data, tg_data in izip(input_data, target_data):
-        dataset.addSample(in_data, tg_data)
+    dataset = [Instance(inp, tgt) for inp, tgt in izip(input_data, target_data)]
 
     if args['verbose']:
         print('Dataset built.')
