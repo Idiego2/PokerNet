@@ -3,7 +3,7 @@
 from __future__ import print_function
 from itertools import izip
 
-from pybrain.datasets import SupervisedDataSet
+from pybrain.datasets import SupervisedDataSet, ClassificationDataSet
 
 
 def preprocess_load_data(loaded_lines):
@@ -33,13 +33,19 @@ def build_dataset(args, input_data, target_data):
        input_data -- suit and rank combinations (list)
        target_data -- different poker hands (list)
     """
-    dataset = SupervisedDataSet(len(input_data[0]), len(target_data[0]))
+    #dataset = SupervisedDataSet(len(input_data[0]), len(target_data[0]))
+    dataset = ClassificationDataSet(len(input_data[0]), len(target_data[0]),
+                                    nb_classes=10)
     for in_data, tg_data in izip(input_data, target_data):
         dataset.addSample(in_data, tg_data)
 
     if args['verbose']:
         print('Dataset built.')
 
+    print("First sample (input, target, class):")
+    print(dataset['input'])
+    print(dataset['target'])
+    print(dataset['class'])
     return dataset
 
 
