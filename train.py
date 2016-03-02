@@ -3,27 +3,29 @@
 
 from __future__ import absolute_import, print_function
 from argparse import ArgumentParser as Parser
+from itertools import izip
 
 from pybrain.tools.shortcuts import buildNetwork
+from pybrain.tools.validation import Validator
 from pybrain.utilities import percentError
 from pybrain.supervised.trainers import RPropMinusTrainer, BackpropTrainer
 
 from load import load_data
 
 
-def rprop_trainer(*a, **kw):
-    """Resilient backpropagation trainer"""
+def rp_trainer(*a, **kw):
+    """Resilient back-propagation trainer"""
     return RPropMinusTrainer(*a, **kw)
 
 
 def gdm_trainer(*a, **kw):
-    """Gradient descent method trainer with backpropagation"""
+    """Gradient descent with momentum trainer which uses back-propagation"""
     if kw['momentum'] == 0:
         raise ValueError('You must set the momentum for gradient descent!')
     return BackpropTrainer(*a, **kw)
 
 
-TRAIN_METHODS = {'rprop': rprop_trainer,
+TRAIN_METHODS = {'rp': rp_trainer,
                  'gdm': gdm_trainer,}
 
 
@@ -34,8 +36,8 @@ def get_parser():
                         help='# of training iterations (default: 1000)')
     parser.add_argument('-hu', '--hidden', type=int, nargs='?', default=10, 
                         help='# of hidden units (default: 10)')
-    parser.add_argument('-m', '--method', type=str, nargs='?', default='rprop',
-                        help='training method (default: rprop)')
+    parser.add_argument('-m', '--method', type=str, nargs='?', default='rp',
+                        help='training method (default: rp)')
     parser.add_argument('-mo', '--momentum', type=float, nargs='?', default=0,
                         help='training momentum (default: 0)')
     parser.add_argument('-nt', '--num-testing', type=int, nargs='?', default='25000',
@@ -54,7 +56,10 @@ def train(args, training_ds):
     """
     # Build a feed-forward network with x hidden units
     if args['verbose']:
-        print('\nBuilding network...')
+        print('\nBuilding network:')
+        print('\tinput neurons: {}'.format(training_ds.indim))
+        print('\thidden neurons: {}'.format(args['hidden']))
+        print('\toutput neurons: {}'.format(training_ds.outdim))
     ff_network = buildNetwork(training_ds.indim, args['hidden'],
                               training_ds.outdim)
     if args['verbose']:
@@ -62,7 +67,10 @@ def train(args, training_ds):
 
     # Train using user-specified method and training data for n epochs
     if args['verbose']:
-        print('\nTraining network for {0} epochs...'.format(args['epochs']))
+        print('\nTraining network:')
+        print('\tmax epochs: {}'.format(args['epochs']))
+        print('\tmethod: {}'.format(args['method']))
+        print('\tmomentum: {}'.format(args['momentum']))
     trainer = TRAIN_METHODS[args['method']](ff_network, dataset=training_ds,
                                             verbose=args['verbose'],
                                             momentum=args['momentum'])
@@ -72,20 +80,33 @@ def train(args, training_ds):
     except (KeyboardInterrupt, EOFError):
         pass
 
-    return trainer
+    return trainer, ff_network
 
 
-def evaluate(args, trainer, training_ds, testing_ds):
-    """Use the trainer to evaluate the network on the training and test data"""
+def evaluate(args, trainer, ff_network, training_ds, testing_ds):
+    """Evaluate the networks hit rate and MSE on training and testing"""
     if args['verbose']:
-        print('\nEvaluating the network...')
-    print('Total epochs: %4d' % trainer.totalepochs)
-    training_result = percentError(trainer.testOnClassData(training_ds),
-                                   training_ds['class'])
-    print('Training error: %5.2f%%' % training_result)
-    testing_result = percentError(trainer.testOnClassData(testing_ds),
-                                  testing_ds['class'])
-    print('Testing error: %5.2f%%' % testing_result)
+        print('\nEvaluating the networks hit rate and MSE:')
+    print('\tTotal epochs: %4d' % trainer.totalepochs)
+
+    def print_dataset_eval(dataset):
+        predicted = list(map(ff_network.activate, dataset['input']))
+        hits = 0
+        mse = 0
+
+        for pred, targ in izip(predicted, dataset['target']):
+            hits += Validator.classificationPerformance(pred, targ)
+            mse += Validator.MSE(pred, targ)
+        total_hits = hits / len(predicted)
+        total_mse = mse / len(predicted)
+        print('\t\tHit rate: {}'.format(total_hits))
+        print('\t\tMSE: {}'.format(total_mse))
+
+    print('\n\tTraining set:')
+    print_dataset_eval(training_ds)
+
+    print('\n\tTesting set:')
+    print_dataset_eval(testing_ds)
 
 
 def run_simulation(args):
@@ -93,10 +114,10 @@ def run_simulation(args):
     training_ds, testing_ds = load_data(args)
 
     # Build and train feed-forward neural network
-    trainer = train(args, training_ds)
+    trainer, ff_network = train(args, training_ds)
 
     # Use the trainer to evaluate the network on the training and test data
-    evaluate(args, trainer, training_ds, testing_ds)
+    evaluate(args, trainer, ff_network, training_ds, testing_ds)
 
 
 def command_line_runner():
