@@ -6,12 +6,25 @@ from argparse import ArgumentParser as Parser
 
 from pybrain.tools.shortcuts import buildNetwork
 from pybrain.utilities import percentError
-from pybrain.supervised.trainers import RPropMinusTrainer
+from pybrain.supervised.trainers import RPropMinusTrainer, BackpropTrainer
 
 from load import load_data
 
-TRAIN_METHODS = {'rprop': RPropMinusTrainer,
-                 }
+
+def rprop_trainer(*a, **kw):
+    """Resilient backpropagation trainer"""
+    return RPropMinusTrainer(*a, **kw)
+
+
+def gdm_trainer(*a, **kw):
+    """Gradient descent method trainer with backpropagation"""
+    if kw['momentum'] == 0:
+        raise ValueError('You must set the momentum for gradient descent!')
+    return BackpropTrainer(*a, **kw)
+
+
+TRAIN_METHODS = {'rprop': rprop_trainer,
+                 'gdm': gdm_trainer,}
 
 
 def get_parser():
@@ -23,6 +36,8 @@ def get_parser():
                         help='# of hidden units (default: 10)')
     parser.add_argument('-m', '--method', type=str, nargs='?', default='rprop',
                         help='training method (default: rprop)')
+    parser.add_argument('-mo', '--momentum', type=float, nargs='?', default=0,
+                        help='training momentum (default: 0)')
     parser.add_argument('-nt', '--num-testing', type=int, nargs='?', default='25000',
                         help='# of testing inputs (default: 25000')
     parser.add_argument('-v', '--verbose', help='print status messages',
@@ -49,7 +64,8 @@ def train(args, training_ds):
     if args['verbose']:
         print('\nTraining network for {0} epochs...'.format(args['epochs']))
     trainer = TRAIN_METHODS[args['method']](ff_network, dataset=training_ds,
-                                            verbose=args['verbose'])
+                                            verbose=args['verbose'],
+                                            momentum=args['momentum'])
 
     try:
         trainer.trainEpochs(args['epochs'])
@@ -65,18 +81,14 @@ def evaluate(args, trainer, training_ds, testing_ds):
         print('\nEvaluating the network...')
     print('Total epochs: %4d' % trainer.totalepochs)
     training_result = percentError(trainer.testOnClassData(training_ds),
-                                   training_ds)
+                                   training_ds['class'])
     print('Training error: %5.2f%%' % training_result)
     testing_result = percentError(trainer.testOnClassData(testing_ds),
-                                  testing_ds)
+                                  testing_ds['class'])
     print('Testing error: %5.2f%%' % testing_result)
 
 
-def command_line_runner():
-    """Handle command-line interaction"""
-    parser = get_parser()
-    args = vars(parser.parse_args())
-
+def run_simulation(args):
     # Load training and test data
     training_ds, testing_ds = load_data(args)
 
@@ -85,6 +97,14 @@ def command_line_runner():
 
     # Use the trainer to evaluate the network on the training and test data
     evaluate(args, trainer, training_ds, testing_ds)
+
+
+def command_line_runner():
+    """Handle command-line interaction"""
+    parser = get_parser()
+    args = vars(parser.parse_args())
+
+    run_simulation(args)
 
 
 if __name__ == '__main__':
