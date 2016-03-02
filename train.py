@@ -7,7 +7,6 @@ from itertools import izip
 
 from pybrain.tools.shortcuts import buildNetwork
 from pybrain.tools.validation import Validator
-from pybrain.utilities import percentError
 from pybrain.supervised.trainers import RPropMinusTrainer, BackpropTrainer
 
 from load import load_data
@@ -34,13 +33,17 @@ def get_parser():
     parser = Parser(description='Train neural network to classify poker hands')
     parser.add_argument('-e', '--epochs', type=int, nargs='?', default=1000,
                         help='# of training iterations (default: 1000)')
-    parser.add_argument('-hu', '--hidden', type=int, nargs='?', default=10, 
+    parser.add_argument('-hi', '--hidden', type=int, nargs='?', default=10,
                         help='# of hidden units (default: 10)')
+    parser.add_argument('-lr', '--learning-rate', type=float,
+                        nargs='?', default=0.2,
+                        help='controls size of weight changes (default: 0.2)')
     parser.add_argument('-m', '--method', type=str, nargs='?', default='rp',
                         help='training method (default: rp)')
     parser.add_argument('-mo', '--momentum', type=float, nargs='?', default=0,
                         help='training momentum (default: 0)')
-    parser.add_argument('-nt', '--num-testing', type=int, nargs='?', default='25000',
+    parser.add_argument('-nt', '--num-testing', type=int,
+                        nargs='?', default='25000',
                         help='# of testing inputs (default: 25000')
     parser.add_argument('-v', '--verbose', help='print status messages',
                         action='store_true')
@@ -60,6 +63,7 @@ def train(args, training_ds):
         print('\tinput neurons: {}'.format(training_ds.indim))
         print('\thidden neurons: {}'.format(args['hidden']))
         print('\toutput neurons: {}'.format(training_ds.outdim))
+
     ff_network = buildNetwork(training_ds.indim, args['hidden'],
                               training_ds.outdim)
     if args['verbose']:
@@ -71,9 +75,12 @@ def train(args, training_ds):
         print('\tmax epochs: {}'.format(args['epochs']))
         print('\tmethod: {}'.format(args['method']))
         print('\tmomentum: {}'.format(args['momentum']))
+        print('\tlearning rate: {}'.format(args['learning_rate']))
+
     trainer = TRAIN_METHODS[args['method']](ff_network, dataset=training_ds,
                                             verbose=args['verbose'],
-                                            momentum=args['momentum'])
+                                            momentum=args['momentum'],
+                                            learningrate=args['learning_rate'])
 
     try:
         trainer.trainEpochs(args['epochs'])
@@ -90,7 +97,8 @@ def evaluate(args, trainer, ff_network, training_ds, testing_ds):
     print('\tTotal epochs: %4d' % trainer.totalepochs)
 
     def print_dataset_eval(dataset):
-        predicted = list(map(ff_network.activate, dataset['input']))
+        """Print dataset hit rate and MSE"""
+        predicted = [ff_network.activate(x) for x in dataset['input']]
         hits = 0
         mse = 0
 
@@ -99,6 +107,7 @@ def evaluate(args, trainer, ff_network, training_ds, testing_ds):
             mse += Validator.MSE(pred, targ)
         total_hits = hits / len(predicted)
         total_mse = mse / len(predicted)
+
         print('\t\tHit rate: {}'.format(total_hits))
         print('\t\tMSE: {}'.format(total_mse))
 
@@ -110,6 +119,7 @@ def evaluate(args, trainer, ff_network, training_ds, testing_ds):
 
 
 def run_simulation(args):
+    """Run ANN simulation"""
     # Load training and test data
     training_ds, testing_ds = load_data(args)
 
