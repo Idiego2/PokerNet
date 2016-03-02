@@ -6,7 +6,7 @@ Based off the similarly titled study ["Predicting Poker Hand's Strength With Art
 
 ## Abstract
 
-In this study, artificial neural networks are used to classify five cards drawn from a standard deck of 52 by suits and ranks of each card. After determining each cards value, system measures strength of the hand according to the poker game. Machine learning library [PyBrain](https://github.com/pybrain/pybrain) is used to design, train and test the network. The data used in this study is taken from UCI data archive page.
+In this study, artificial neural networks are used to classify five cards drawn from a standard deck of 52 by suits and ranks of each card. After determining each cards value, system measures strength of the hand according to the poker game. Machine learning library [python-neural-network](https://github.com/jorgenkg/python-neural-network) is used to design, train and test the network. The data used in this study is taken from UCI data archive page.
 
 ## Methods
 
