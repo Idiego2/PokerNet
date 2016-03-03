@@ -132,10 +132,6 @@ class NeuralNet:
             
             input_signals, derivatives = self.update( training_data, trace=True )
             self.out                   = self.transform_output(input_signals[-1])
-            print('out is : ')
-            print(self.out)
-            print('training targets is: ')
-            print(training_targets)
             error                      = (self.out - training_targets).T
             num_correct                = sum(sum(o == t) for o, t in izip(self.out, training_targets))
             hit_rate                   = float(num_correct) / len(self.out)
@@ -179,10 +175,6 @@ class NeuralNet:
         
         input_signals, derivatives = self.update( training_data, trace=True )
         self.out                   = self.transform_output(input_signals[-1])
-        print('out is : ')
-        print(self.out)
-        print('training targets is: ')
-        print(training_targets)
         error                      = (self.out - training_targets).T
         delta                      = error * derivatives[-1]
         MSE                        = np.mean( np.power(error,2) )
