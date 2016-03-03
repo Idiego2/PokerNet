@@ -8,7 +8,7 @@ from itertools import izip
 import numpy as np
 
 from load import load_data
-from activation_functions import tanh_function, sigmoid_function
+from activation_functions import softmax_function, sigmoid_function
 from neuralnet import NeuralNet
 
 
@@ -40,16 +40,19 @@ TRAIN_METHODS = {'gdm': gdm_trainer,
                  'scg': scg_trainer,
                  'rp': rp_trainer}
 
-ACTIVATION_FNS = {'tanh': tanh_function,
+ACTIVATION_FNS = {'softmax': softmax_function,
                   'sigmoid': sigmoid_function}
 
 
 def get_parser():
     """Parse command-line arguments"""
     parser = Parser(description='Train neural network to classify poker hands')
-    parser.add_argument('-a', '--activation', type=str,
+    parser.add_argument('-ah', '--activation-hidden', type=str,
                         nargs='?', default='sigmoid',
-                        help='how to define node output (default: sigmoid)')
+                        help='hidden layer activation fn (default: sigmoid)')
+    parser.add_argument('-ao', '--activation-output', type=str,
+                        nargs='?', default='softmax',
+                        help='output layer activation fn (default: softmax)')
     parser.add_argument('-e', '--epochs', type=int, nargs='?', default=1000,
                         help='# of training iterations (default: 1000)')
     parser.add_argument('-hi', '--hidden', type=int, nargs='?', default=10,
@@ -81,8 +84,9 @@ def train(args, training_ds):
     target_dim = len(training_ds[0].targets)
     settings = {"n_inputs": feature_dim,
                 "layers": [(feature_dim + target_dim + args['hidden'],
-                            tanh_function),
-                           (target_dim, ACTIVATION_FNS[args['activation']])]}
+                            ACTIVATION_FNS[args['activation_hidden']]),
+                           (target_dim,
+                            ACTIVATION_FNS[args['activation_output']])]}
 
     if args['verbose']:
         print('\nBuilding network:')
