@@ -123,17 +123,15 @@ def evaluate(args, ff_network, training_ds, testing_ds):
     if args['verbose']:
         print('\nEvaluating the networks overall results and MSE:')
 
-    def print_dataset_eval(dataset):
-        """Evalute and print networks overall results and MSE for a dataset"""
-        mse, overall_results = ff_network.test(dataset)
-        print('\t\tOverall results: {}'.format(overall_results))
-        print('\t\tMSE: {}'.format(mse))
+    def dataset_eval(dataset):
+        """Evaluate the networks overall results and MSE for a dataset"""
+        return ff_network.test(dataset)
 
     print('\n\tTraining set:')
-    print_dataset_eval(training_ds)
+    tr_mse, tr_res = dataset_eval(training_ds)
 
     print('\n\tTesting set:')
-    print_dataset_eval(testing_ds)
+    te_mse, te_res = dataset_eval(testing_ds)
 
 
 def run_simulation(args):

@@ -145,7 +145,7 @@ class NeuralNet:
 
             bit_out                    = self.bit_array_transform(out)
             num_correct                = sum(1 if all(x) else 0 for x in bit_out == training_targets)
-            print('num correct: {}/{}'.format(num_correct, len(bit_out)))
+            print('* # correct: {}/{}'.format(num_correct, len(bit_out)))
             overall_results            = float(num_correct) / float(len(bit_out))
             
             
@@ -261,7 +261,7 @@ class NeuralNet:
 
             bit_out                    = self.bit_array_transform(out)
             num_correct                = sum(1 if all(x) else 0 for x in bit_out == training_targets)
-            print('num correct: {}/{}'.format(num_correct, len(bit_out)))
+            print('* # correct: {}/{}'.format(num_correct, len(bit_out)))
             overall_results            = float(num_correct) / float(len(bit_out))
             
             
@@ -451,8 +451,10 @@ class NeuralNet:
 
         bit_out                    = self.bit_array_transform(out)
         num_correct                = sum(1 if all(x) else 0 for x in bit_out == test_targets)
-        print('num correct: {}/{}'.format(num_correct, len(bit_out)))
         overall_results            = float(num_correct) / float(len(bit_out))
+        print('\t\t# correct: {}/{}'.format(num_correct, len(bit_out)))
+        print('\t\tOverall results: {}'.format(overall_results))
+        print('\t\tMSE: {}'.format(MSE))
         
         return MSE, overall_results
     #end
