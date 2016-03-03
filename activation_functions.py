@@ -12,7 +12,7 @@ except:
 def softmax_function( signal, derivative=False ):
     # Calculate activation signal
     e = np.exp( signal )
-    signal = e / np.sum(e)
+    signal = e / (np.sum(e)*len(signal)) 
 
     if derivative:
         # Return the partial derivation of the activation function
