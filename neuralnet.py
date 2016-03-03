@@ -28,7 +28,14 @@ class NeuralNet:
         # Initialize the network with new randomized weights
         self.set_weights( self.generate_weights( self.weights_low, self.weights_high ) )
     #end
-    
+
+    def transform_output(self, output):
+        """Transform weight vector into a bit vector"""
+        def bit_vec_transform(num):
+            vec = [0]*10
+            vec[int(num)] = 1
+            return vec
+        return [bit_vec_transform(o.argmax()) for o in output] 
     
     def generate_weights(self, low = -0.1, high = 0.1):
         # Generate new random weights for all the connections in the network
@@ -86,7 +93,7 @@ class NeuralNet:
         
         input_signals, derivatives = self.update( training_data, trace=True )
         
-        self.out                   = input_signals[-1]
+        self.out                   = self.transform_output(input_signals[-1])
         error                      = (self.out - training_targets).T
         delta                      = error * derivatives[-1]
         MSE                        = np.mean( np.power(error,2) )
@@ -124,7 +131,11 @@ class NeuralNet:
             #end weight adjustment loop
             
             input_signals, derivatives = self.update( training_data, trace=True )
-            self.out                   = input_signals[-1]
+            self.out                   = self.transform_output(input_signals[-1])
+            print('out is : ')
+            print(self.out)
+            print('training targets is: ')
+            print(training_targets)
             error                      = (self.out - training_targets).T
             num_correct                = sum(sum(o == t) for o, t in izip(self.out, training_targets))
             hit_rate                   = float(num_correct) / len(self.out)
@@ -167,7 +178,11 @@ class NeuralNet:
         
         
         input_signals, derivatives = self.update( training_data, trace=True )
-        self.out                   = input_signals[-1]
+        self.out                   = self.transform_output(input_signals[-1])
+        print('out is : ')
+        print(self.out)
+        print('training targets is: ')
+        print(training_targets)
         error                      = (self.out - training_targets).T
         delta                      = error * derivatives[-1]
         MSE                        = np.mean( np.power(error,2) )
@@ -235,7 +250,7 @@ class NeuralNet:
             prev_MSE                   = MSE
             
             input_signals, derivatives = self.update( training_data, trace=True )
-            self.out                   = input_signals[-1]
+            self.out                   = self.transform_output(input_signals[-1])
             error                      = (self.out - training_targets).T
             num_correct                = sum(sum(o == t) for o, t in izip(self.out, training_targets))
             hit_rate                   = float(num_correct) / len(self.out)
@@ -264,7 +279,7 @@ class NeuralNet:
         self.weights               = self.unpack( np.array(weight_vector) )
         input_signals, derivatives = self.update( training_data, trace=True )
         
-        self.out                   = input_signals[-1]
+        self.out                   = self.transform_output(input_signals[-1])
         error                      = (self.out - training_targets).T
         delta                      = error * derivatives[-1]
         
