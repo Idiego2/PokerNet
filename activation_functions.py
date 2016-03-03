@@ -9,6 +9,19 @@ except:
     expit = lambda x: 1.0 / (1 + np.exp(-x))
 
 
+def softmax_function( signal, derivative=False ):
+    # Calculate activation signal
+    e = np.exp( signal )
+    signal = e / np.sum(e)
+
+    if derivative:
+        # Return the partial derivation of the activation function
+        return signal - np.power(signal,2)
+
+    return signal
+#end activation function
+
+
 def sigmoid_function( signal, derivative=False ):
     # Prevent overflow.
     signal = np.clip( signal, -500, 500 )
