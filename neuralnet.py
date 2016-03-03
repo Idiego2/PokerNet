@@ -1,6 +1,5 @@
 """python-neural-network"""
 
-from itertools import izip
 from tools import dropout, add_bias, confirm
 import numpy as np
 import collections
@@ -28,14 +27,7 @@ class NeuralNet:
         # Initialize the network with new randomized weights
         self.set_weights( self.generate_weights( self.weights_low, self.weights_high ) )
     #end
-
-    def transform_output(self, output):
-        """Transform weight vector into a bit vector"""
-        def bit_vec_transform(num):
-            vec = [0]*10
-            vec[int(num)] = 1
-            return vec
-        return [bit_vec_transform(o.argmax()) for o in output] 
+    
     
     def generate_weights(self, low = -0.1, high = 0.1):
         # Generate new random weights for all the connections in the network
@@ -73,6 +65,21 @@ class NeuralNet:
         # This will stack all the weights in the network on a list, which may be saved to the disk.
         return [w for l in self.weights for w in l.flat]
     #end
+
+
+    def bit_array_transform(self, output ):
+        # Transforms a feature array to a bit array representation 
+        def bit_transform( arr ):
+            # Largest weight becomes 1 in the bit array
+            bit_arr = np.copy( arr )
+            greatest = bit_arr.argmax()
+            bit_arr[:] = 0
+            bit_arr[greatest] = 1
+            return bit_arr
+
+        return np.apply_along_axis(bit_transform, 1, output)
+    #end
+
     
     def backpropagation(self, trainingset, ERROR_LIMIT = 1e-3, learning_rate = 0.03, momentum_factor = 0.9, max_iterations = ()  ):
         
@@ -93,8 +100,8 @@ class NeuralNet:
         
         input_signals, derivatives = self.update( training_data, trace=True )
         
-        self.out                   = self.transform_output(input_signals[-1])
-        error                      = (self.out - training_targets).T
+        out                        = input_signals[-1]
+        error                      = (out - training_targets).T
         delta                      = error * derivatives[-1]
         MSE                        = np.mean( np.power(error,2) )
         
@@ -131,15 +138,20 @@ class NeuralNet:
             #end weight adjustment loop
             
             input_signals, derivatives = self.update( training_data, trace=True )
-            self.out                   = self.transform_output(input_signals[-1])
-            error                      = (self.out - training_targets).T
-            num_correct                = sum(sum(o == t) for o, t in izip(self.out, training_targets))
-            hit_rate                   = float(num_correct) / len(self.out)
+            out                        = input_signals[-1]
+            error                      = (out - training_targets).T
             delta                      = error * derivatives[-1]
             MSE                        = np.mean( np.power(error,2) )
 
-            print "\tCurrent hit rate: {}".format(hit_rate)
-            print "\tCurrent network error (MSE): {}".format(MSE)
+            bit_out                    = self.bit_array_transform(out)
+            num_correct                = sum(1 if all(x) else 0 for x in bit_out == training_targets)
+            print('num correct: {}/{}'.format(num_correct, len(bit_out)))
+            overall_results            = float(num_correct) / float(len(bit_out))
+            
+            
+            # Show the current training status
+            print "* current network error (MSE):", MSE
+            print "* current overall results (% correct):", overall_results
         
         print "* Converged to error bound (%.4g) with MSE = %.4g." % ( ERROR_LIMIT, MSE )
         print "* Trained for %d epochs." % epoch
@@ -174,8 +186,8 @@ class NeuralNet:
         
         
         input_signals, derivatives = self.update( training_data, trace=True )
-        self.out                   = self.transform_output(input_signals[-1])
-        error                      = (self.out - training_targets).T
+        out                        = input_signals[-1]
+        error                      = (out - training_targets).T
         delta                      = error * derivatives[-1]
         MSE                        = np.mean( np.power(error,2) )
         
@@ -242,15 +254,20 @@ class NeuralNet:
             prev_MSE                   = MSE
             
             input_signals, derivatives = self.update( training_data, trace=True )
-            self.out                   = self.transform_output(input_signals[-1])
-            error                      = (self.out - training_targets).T
-            num_correct                = sum(sum(o == t) for o, t in izip(self.out, training_targets))
-            hit_rate                   = float(num_correct) / len(self.out)
+            out                        = input_signals[-1]
+            error                      = (out - training_targets).T
             delta                      = error * derivatives[-1]
             MSE                        = np.mean( np.power(error,2) )
+
+            bit_out                    = self.bit_array_transform(out)
+            num_correct                = sum(1 if all(x) else 0 for x in bit_out == training_targets)
+            print('num correct: {}/{}'.format(num_correct, len(bit_out)))
+            overall_results            = float(num_correct) / float(len(bit_out))
             
-            print "\tCurrent hit rate: {}".format(hit_rate)
-            print "\tCurrent network error (MSE): {}".format(MSE)
+            
+            # Show the current training status
+            print "* current network error (MSE):", MSE
+            print "* current overall results (% correct):", overall_results
     
         print "* Converged to error bound (%.3g) with MSE = %.3g." % ( ERROR_LIMIT, MSE )
         print "* Trained for %d epochs." % epoch
@@ -261,8 +278,8 @@ class NeuralNet:
     
     def error(self, weight_vector, training_data, training_targets ):
         self.weights               = self.unpack( np.array(weight_vector) )
-        self.out                   = self.update( training_data )
-        error                      = (self.out - training_targets).T
+        out                        = self.update( training_data )
+        error                      = (out - training_targets).T
         return np.mean( np.power(error,2) )
     #end
     
@@ -271,8 +288,8 @@ class NeuralNet:
         self.weights               = self.unpack( np.array(weight_vector) )
         input_signals, derivatives = self.update( training_data, trace=True )
         
-        self.out                   = self.transform_output(input_signals[-1])
-        error                      = (self.out - training_targets).T
+        out                        = input_signals[-1]
+        error                      = (out - training_targets).T
         delta                      = error * derivatives[-1]
         
         layers = []
@@ -386,11 +403,7 @@ class NeuralNet:
             if comparison < 0.25: 
                 lamb        = 4 * lamb
         
-            num_correct       = sum(sum(o == t) for o, t in izip(self.out, training_targets))
-            hit_rate          = float(num_correct) / len(self.out)
-
-            print "\tCurrent hit rate: {}".format(hit_rate)
-            print "\tCurrent network error (MSE): {}".format(f_new)
+            print "* current network error (MSE):", f_new
         #end
         
         self.weights = self.unpack( np.array(vector_new) )
@@ -429,17 +442,19 @@ class NeuralNet:
     #end
     
     def test(self, testset ):
-        """Return hit rate of the outputs compared to the targets and MSE."""
         test_data    = np.array( [instance.features for instance in testset ] )
         test_targets = np.array( [instance.targets  for instance in testset ] )
         
-        self.out          = self.update( test_data )
-        error             = (self.out - test_targets).T
-        num_correct       = sum(sum(o == t) for o, t in izip(self.out, test_targets))
-        hit_rate          = float(num_correct) / len(self.out)
+        out               = self.update( test_data )
+        error             = (out - test_targets).T
         MSE               = np.mean( np.power(error,2) )
+
+        bit_out                    = self.bit_array_transform(out)
+        num_correct                = sum(1 if all(x) else 0 for x in bit_out == test_targets)
+        print('num correct: {}/{}'.format(num_correct, len(bit_out)))
+        overall_results            = float(num_correct) / float(len(bit_out))
         
-        return hit_rate, MSE
+        return MSE, overall_results
     #end
     
     def save_to_file(self, filename = "network0.pkl" ):

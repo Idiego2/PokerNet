@@ -66,7 +66,7 @@ def get_parser():
                         help='training momentum (default: 0)')
     parser.add_argument('-nt', '--num-testing', type=int,
                         nargs='?', default='25000',
-                        help='# of testing inputs (default: 25000')
+                        help='# of testing inputs (default: 25000)')
     parser.add_argument('-v', '--verbose', help='print status messages',
                         action='store_true')
     return parser
@@ -125,7 +125,7 @@ def evaluate(args, ff_network, training_ds, testing_ds):
 
     def print_dataset_eval(dataset):
         """Evalute and print networks overall results and MSE for a dataset"""
-        overall_results, mse = ff_network.test(dataset)
+        mse, overall_results = ff_network.test(dataset)
         print('\t\tOverall results: {}'.format(overall_results))
         print('\t\tMSE: {}'.format(mse))
 
