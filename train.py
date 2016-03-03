@@ -8,7 +8,7 @@ from itertools import izip
 import numpy as np
 
 from load import load_data
-from activation_functions import softmax_function, sigmoid_function
+from activation_functions import linear_function, softmax_function, tanh_function
 from neuralnet import NeuralNet
 
 
@@ -40,16 +40,17 @@ TRAIN_METHODS = {'gdm': gdm_trainer,
                  'scg': scg_trainer,
                  'rp': rp_trainer}
 
-ACTIVATION_FNS = {'softmax': softmax_function,
-                  'sigmoid': sigmoid_function}
+ACTIVATION_FNS = {'purelin': linear_function,
+                  'softmax': softmax_function,
+                  'tansig': tanh_function}
 
 
 def get_parser():
     """Parse command-line arguments"""
     parser = Parser(description='Train neural network to classify poker hands')
     parser.add_argument('-ah', '--activation-hidden', type=str,
-                        nargs='?', default='sigmoid',
-                        help='hidden layer activation fn (default: sigmoid)')
+                        nargs='?', default='tansig',
+                        help='hidden layer activation fn (default: tansig)')
     parser.add_argument('-ao', '--activation-output', type=str,
                         nargs='?', default='softmax',
                         help='output layer activation fn (default: softmax)')
