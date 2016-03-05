@@ -18,9 +18,10 @@ def softmax_function( signal, derivative=False ):
 
     if derivative:
         # Return the partial derivation of the activation function
-        return signal - np.power(signal,2)
-
-    return signal
+        return np.multiply(signal, 1-signal)
+    else:
+        # Return the activation signal
+        return signal
 #end activation function
 
 
