@@ -12,27 +12,26 @@ from activation_functions import linear_function, softmax_function, tanh_functio
 from neuralnet import NeuralNet
 
 
-def gdm_trainer(ff_network, training_ds, max_iterations, learning_rate,
-                momentum_factor):
+def gdm_trainer(ff_network, training_ds, max_iterations, learning_rate):
     """Gradient descent with momentum trainer which uses back-propagation"""
-    if momentum_factor == 0:
-        raise ValueError('You must set the momentum for gradient descent!')
     return ff_network.backpropagation(training_ds,
                                       max_iterations=max_iterations,
+                                      ERROR_LIMIT=1e-10,
                                       learning_rate=learning_rate,
-                                      momentum_factor=momentum_factor)
+                                      momentum_factor=0.7)
 
 
-def scg_trainer(ff_network, training_ds, max_iterations, learning_rate,
-                momentum_factor):
+def scg_trainer(ff_network, training_ds, max_iterations, learning_rate):
     """Scaled conjugate gradient trainer"""
-    return ff_network.scg(training_ds, max_iterations=max_iterations)
+    return ff_network.scg(training_ds,
+                          ERROR_LIMIT=1e-10,
+                          max_iterations=max_iterations)
 
 
-def rp_trainer(ff_network, training_ds, max_iterations, learning_rate,
-               momentum_factor):
+def rp_trainer(ff_network, training_ds, max_iterations, learning_rate):
     """Resilient back-propagation trainer"""
     return ff_network.resilient_backpropagation(training_ds,
+                                                ERROR_LIMIT=1e-10,
                                                 max_iterations=max_iterations)
 
 
@@ -48,23 +47,18 @@ ACTIVATION_FNS = {'purelin': linear_function,
 def get_parser():
     """Parse command-line arguments"""
     parser = Parser(description='Train neural network to classify poker hands')
-    parser.add_argument('-ah', '--activation-hidden', type=str,
+    parser.add_argument('-a', '--activation', type=str,
                         nargs='?', default='tansig',
                         help='hidden layer activation fn (default: tansig)')
-    parser.add_argument('-ao', '--activation-output', type=str,
-                        nargs='?', default='softmax',
-                        help='output layer activation fn (default: softmax)')
-    parser.add_argument('-e', '--epochs', type=int, nargs='?', default=1000,
+    parser.add_argument('-me', '--max_epoch', type=int, nargs='?', default=1000,
                         help='# of training iterations (default: 1000)')
-    parser.add_argument('-hi', '--hidden', type=int, nargs='?', default=10,
-                        help='# of hidden units (default: 10)')
+    parser.add_argument('-hn', '--hidden-neurons', type=int, nargs='?', default=10,
+                        help='# of hidden neuron units (default: 10)')
     parser.add_argument('-lr', '--learning-rate', type=float,
                         nargs='?', default=0.2,
                         help='controls size of weight changes (default: 0.2)')
     parser.add_argument('-m', '--method', type=str, nargs='?', default='rp',
                         help='training method (default: rp)')
-    parser.add_argument('-mo', '--momentum', type=float, nargs='?', default=0,
-                        help='training momentum (default: 0)')
     parser.add_argument('-nt', '--num-testing', type=int,
                         nargs='?', default='25000',
                         help='# of testing inputs (default: 25000)')
@@ -84,15 +78,15 @@ def train(args, training_ds):
     feature_dim = len(training_ds[0].features)
     target_dim = len(training_ds[0].targets)
     settings = {"n_inputs": feature_dim,
-                "layers": [(feature_dim + target_dim + args['hidden'],
-                            ACTIVATION_FNS[args['activation_hidden']]),
+                "layers": [(feature_dim + target_dim + args['hidden_neurons'],
+                            ACTIVATION_FNS[args['activation']]),
                            (target_dim,
-                            ACTIVATION_FNS[args['activation_output']])]}
+                            ACTIVATION_FNS['softmax']])]}
 
     if args['verbose']:
         print('\nBuilding network:')
         print('\tinput neurons: {}'.format(feature_dim))
-        print('\thidden neurons: {}'.format(args['hidden']))
+        print('\thidden neurons: {}'.format(args['hidden_neurons']))
         print('\toutput neurons: {}'.format(target_dim))
 
     ff_network = NeuralNet(settings)
@@ -103,16 +97,16 @@ def train(args, training_ds):
     # Train using user-specified method and training data for n epochs
     if args['verbose']:
         print('\nTraining network:')
-        print('\tmax epochs: {}'.format(args['epochs']))
+        print('\tmax epoch: {}'.format(args['max_epoch']))
         print('\tmethod: {}'.format(args['method']))
-        print('\tmomentum: {}'.format(args['momentum']))
+        if args['method'] == 'gdm':
+            print('\tmomentum: 0.7')
         print('\tlearning rate: {}'.format(args['learning_rate']))
     
     try:
         TRAIN_METHODS[args['method']](ff_network, training_ds,
-                                      max_iterations=args['epochs'],
-                                      learning_rate=args['learning_rate'],
-                                      momentum_factor=args['momentum'])
+                                      max_iterations=args['max_epoch'],
+                                      learning_rate=args['learning_rate'])
     except (KeyboardInterrupt, EOFError):
         pass
 
