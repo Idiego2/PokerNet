@@ -433,7 +433,10 @@ class NeuralNet:
             if trace: 
                 outputs.append( output )
                 # Calculate the derivative, used during weight update
-                derivatives.append( self.layers[i][1]( signal, derivative = True ).T )
+                derivate = self.layers[i][1]( signal, derivative = True)
+                if not isinstance(derivate, int):
+                    derivate = derivate.T
+                derivatives.append(derivate)
         
         if trace: 
             return outputs, derivatives
