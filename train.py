@@ -81,7 +81,7 @@ def train(args, training_ds):
                 "layers": [(feature_dim + target_dim + args['hidden_neurons'],
                             ACTIVATION_FNS[args['activation']]),
                            (target_dim,
-                            ACTIVATION_FNS['softmax']])]}
+                            ACTIVATION_FNS['softmax'])]}
 
     if args['verbose']:
         print('\nBuilding network:')
