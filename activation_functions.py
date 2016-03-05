@@ -10,6 +10,9 @@ except:
 
 
 def softmax_function( signal, derivative=False ):
+    # Prevent overflow.
+    signal = np.clip( signal, -500, 500 )
+
     # Calculate activation signal
     def softmax( sig ):
         e = np.exp( sig )
