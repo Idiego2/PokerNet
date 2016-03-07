@@ -3,7 +3,7 @@
 from __future__ import absolute_import, print_function
 from itertools import izip
 
-from tools import Instance
+from pybrain.datasets import SupervisedDataSet
 
 
 def preprocess_load_data(loaded_lines):
@@ -27,13 +27,15 @@ def preprocess_load_data(loaded_lines):
 
 
 def build_dataset(args, input_data, target_data):
-    """Build datasets as lists of Instances
+    """Build SupervisedDataSet by adding data samples
 
        Keyword arguments:
        input_data -- suit and rank combinations (list)
        target_data -- different poker hands (list)
     """
-    dataset = [Instance(inp, tgt) for inp, tgt in izip(input_data, target_data)]
+    dataset = SupervisedDataSet(len(input_data[0]), len(target_data[0]))
+    for in_data, tg_data in izip(input_data, target_data):
+        dataset.addSample(in_data, tg_data)
 
     if args['verbose']:
         print('Dataset built.')
