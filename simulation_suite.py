@@ -97,7 +97,7 @@ def table_five():
 
 
 def table_six():
-    """Table 6: comparison of three methods for 10 neurons"""
+    """Table 6: comparison of two methods for 10 neurons"""
     simulation_num = 6
     print('\n** Running simulation {} **\n'.format(simulation_num))
     table_header = ['hidden_neurons', 'method', 'learning_rate', 'max_epochs',
@@ -107,7 +107,7 @@ def table_six():
     args.update({'activation': 'purelin',
                  'max_epochs': 1000,
                  'hidden_neurons': 10})
-    for mthd in ('gdm', 'scg', 'rp'):
+    for mthd in ('gdm', 'rp'):
         args['method'] = mthd
 
         for lrn_rate in (0.2, 0.02):
@@ -157,59 +157,12 @@ def table_eight():
             for lrn_rate in (0.2, 0.02):
                 args['learning_rate'] = lrn_rate
                 run_simulation(args, sim_num=simulation_num, header=table_header)
+
+
 def table_nine():
-    """Table 9: Effect of transfer function for scaled conjugate gradient method"""
-    simulation_num = 9
-    print('\n** Running simulation {} **\n'.format(simulation_num))
-    table_header = ['hidden_neurons', 'method', 'learning_rate', 'max_epochs',
-                    'hits', 'mse']
-
-    args = INIT_ARGS.copy()
-    args.update({'method': 'scg',
-                 'max_epochs': 1000,
-                 'hidden_neurons': 10})
-    for act_fn in ('purelin', 'tansig'):
-        args['activation'] = act_fn
-
-        for lrn_rate in (0.2, 0.02):
-            args['learning_rate'] = lrn_rate
-            run_simulation(args, sim_num=simulation_num, header=table_header)
-
-
-def table_ten():
-    """Table 10: Effect of transfer function for scaled conjugate gradient method"""
-    # Vary validation limit (what is that?)... also need train stop criteria
-    #                                           (validation limit reached or max epoch reached)
-    simulation_num = 10
-    print('\n** Running simulation {} **\n'.format(simulation_num))
-    table_header = ['hidden_neurons', 'validation_limit', 'learning_rate', 'max_epochs',
-                    'hits', 'stop_criteria']
-
-    args = INIT_ARGS.copy()
-    args.update({'method': 'scg',
-                 'hidden_neurons': 50})
-    validation_limit = 100
-    # set validation limit to 100 here
-    args['max_epochs'] = 1000
-    args['learning_rate'] = 0.2
-    run_simulation(args, sim_num=simulation_num, header=table_header)
-
-    # set validation limit to 1000 here
-    validation_limit = 1000
-    args['max_epochs'] = 1000
-    args['learning_rate'] = 0.2
-    run_simulation(args, sim_num=simulation_num, header=table_header)
-
-    args['max_epochs'] = 5000
-    for lrn_rate in (0.2, 0.02):
-        args['learning_rate'] = lrn_rate
-        run_simulation(args, sim_num=simulation_num, header=table_header)
-
-
-def table_eleven():
-    """Table 11: Test results for various networks"""
+    """Table 9: Test results for various networks"""
     # takes the best train result. how many runs to examine?
-    simulation_num = 11
+    simulation_num = 9
     print('\n** Running simulation {} **\n'.format(simulation_num))
     table_header = ['hidden_neurons', 'method', 'learning_rate', 'max_epochs',
                     'hits', 'mse']
@@ -219,34 +172,28 @@ def table_eleven():
                  'max_epochs': 2000})
     for lrn_rate in (0.02, 0.2):
         args['learning_rate'] = lrn_rate
-        for mthd in ('scg', 'rp'):
+        for mthd in ('gdm', 'rp'):
             args['method'] = mthd
             run_simulation(args, sim_num=simulation_num, header=table_header)
 
 
 def run_simulations():
     """Run ANN training simulations with various methods and parameters"""
-    pool = Pool()
-    t1 = pool.apply_async(table_one())
-    t1.get()
-    t2 = pool.apply_async(table_two())
-    t2.get()
-    t3 = pool.apply_async(table_three())
-    t3.get()
-    t4 = pool.apply_async(table_four())
-    t4.get()
-    t5 = pool.apply_async(table_five())
-    t5.get()
-    t6 = pool.apply_async(table_six())
-    t6.get()
-    t7 = pool.apply_async(table_seven())
-    t7.get()
-    t8 = pool.apply_async(table_eight())
-    t8.get()
-    t9 = pool.apply_async(table_nine())
-    t9.get()
-    #table_ten()
-    #table_eleven()
+    # Run processes asynchronously
+    pool = Pool(processes=8)
+
+    p1 = pool.apply_async(table_one())
+    p2 = pool.apply_async(table_two())
+    p3 = pool.apply_async(table_three())
+    p4 = pool.apply_async(table_four())
+    p5 = pool.apply_async(table_five())
+    p6 = pool.apply_async(table_six())
+    p7 = pool.apply_async(table_seven())
+    p8 = pool.apply_async(table_eight())
+    #p9 = pool.apply_async(table_nine())
+
+    pool.close()
+    pool.join()
 
 
 if __name__ == '__main__':
