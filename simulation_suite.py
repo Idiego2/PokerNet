@@ -21,7 +21,7 @@ def table_one():
     args = INIT_ARGS.copy()
     args.update({'method': 'gdm',
                  'activation': 'purelin',
-                 'max_epochs': 1000,
+                 'max_epochs': 100,
                  'learning_rate': 0.02})
     for i in (10, 30, 50):
         args['hidden_neurons'] = i
@@ -38,7 +38,7 @@ def table_two():
     args = INIT_ARGS.copy()
     args.update({'method': 'gdm',
                  'activation': 'purelin',
-                 'max_epochs': 1000,
+                 'max_epochs': 100,
                  'learning_rate': 0.2})
     for i in (10, 30, 50):
         args['hidden_neurons'] = i
@@ -57,7 +57,7 @@ def table_three():
                  'activation': 'purelin',
                  'learning_rate': 0.2,
                  'hidden_neurons': 10})
-    for i in (1000, 2000, 3000):
+    for i in (100, 200, 300):
         args['epochs'] = i
         run_simulation(args, sim_num=simulation_num, header=table_header)
 
@@ -74,7 +74,7 @@ def table_four():
                  'activation': 'purelin',
                  'learning_rate': 0.2,
                  'hidden_neurons': 30})
-    for i in (1000, 2000, 3000):
+    for i in (100, 200, 300):
         args['epochs'] = i
         run_simulation(args, sim_num=simulation_num, header=table_header)
 
@@ -91,7 +91,7 @@ def table_five():
                  'activation': 'purelin',
                  'learning_rate': 0.2,
                  'hidden_neurons': 50})
-    for i in (1000, 2000, 3000):
+    for i in (100, 200, 300):
         args['epochs'] = i
         run_simulation(args, sim_num=simulation_num, header=table_header)
 
@@ -105,7 +105,7 @@ def table_six():
 
     args = INIT_ARGS.copy()
     args.update({'activation': 'purelin',
-                 'max_epochs': 1000,
+                 'max_epochs': 100,
                  'hidden_neurons': 10})
     for mthd in ('gdm', 'rp'):
         args['method'] = mthd
@@ -116,7 +116,7 @@ def table_six():
 
 
 def table_seven():
-    """Table 7: Effect of transfer function for resilient back-propagation method for 1000 iteration"""
+    """Table 7: Effect of transfer function for resilient back-propagation method for 100 iteration"""
     simulation_num = 7
     print('\n** Running simulation {} **\n'.format(simulation_num))
     table_header = ['hidden_neurons', 'method', 'max_epochs', 'learning_rate',
@@ -124,7 +124,7 @@ def table_seven():
 
     args = INIT_ARGS.copy()
     args.update({'method': 'rp',
-                 'max_epochs': 1000,
+                 'max_epochs': 100,
                  'hidden_neurons': 10})
     for n_num in (30, 50):
         args['hidden_neurons'] = n_num
@@ -138,7 +138,7 @@ def table_seven():
 
 
 def table_eight():
-    """Table 8: Effect of transfer function for resilient back-propagation method for 2000 iteration"""
+    """Table 8: Effect of transfer function for resilient back-propagation method for 200 iteration"""
     simulation_num = 8
     print('\n** Running simulation {} **\n'.format(simulation_num))
     table_header = ['hidden_neurons', 'method', 'max_epochs', 'learning_rate',
@@ -146,7 +146,7 @@ def table_eight():
 
     args = INIT_ARGS.copy()
     args.update({'method': 'rp',
-                 'max_epochs': 2000,
+                 'max_epochs': 200,
                  'hidden_neurons': 10})
     for n_num in (10, 30, 50):
         args['hidden_neurons'] = n_num
@@ -169,7 +169,7 @@ def table_nine():
 
     args = INIT_ARGS.copy()
     args.update({'hidden_neurons': 50,
-                 'max_epochs': 2000})
+                 'max_epochs': 200})
     for lrn_rate in (0.02, 0.2):
         args['learning_rate'] = lrn_rate
         for mthd in ('gdm', 'rp'):
