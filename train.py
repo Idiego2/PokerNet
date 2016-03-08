@@ -3,8 +3,6 @@
 
 from __future__ import absolute_import, print_function
 from argparse import ArgumentParser as Parser
-import glob
-import os
 
 from numpy import copy
 from pybrain.structure.modules import LinearLayer, SoftmaxLayer, TanhLayer
@@ -29,8 +27,6 @@ def get_parser():
     parser.add_argument('-a', '--activation', type=str,
                         nargs='?', default='tansig',
                         help='hidden layer activation fn (default: tansig)')
-    parser.add_argument('-c', '--clean', help='remove simulation files',
-                        action='store_true')
     parser.add_argument('-me', '--max_epochs', type=int, nargs='?', default=1000,
                         help='# of training iterations (default: 1000)')
     parser.add_argument('-hn', '--hidden-neurons', type=int, nargs='?', default=10,
@@ -46,13 +42,6 @@ def get_parser():
     parser.add_argument('-v', '--verbose', help='print status messages',
                         action='store_true')
     return parser
-
-
-def cleanup():
-    """Remove all simulation files in current directory"""
-    for sim_file in glob.glob('simulation*.txt'):
-        os.remove(sim_file)
-        print('Removed {}'.format(sim_file))
 
 
 def train(args, training_ds):
