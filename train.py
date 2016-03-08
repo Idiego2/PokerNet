@@ -3,9 +3,10 @@
 
 from __future__ import absolute_import, print_function
 from argparse import ArgumentParser as Parser
-from itertools import izip
+import glob
+import os
 
-import numpy as np
+from numpy import copy
 from pybrain.structure.modules import LinearLayer, SoftmaxLayer, TanhLayer
 from pybrain.supervised.trainers import BackpropTrainer, RPropMinusTrainer
 from pybrain.tools.shortcuts import buildNetwork
@@ -28,6 +29,8 @@ def get_parser():
     parser.add_argument('-a', '--activation', type=str,
                         nargs='?', default='tansig',
                         help='hidden layer activation fn (default: tansig)')
+    parser.add_argument('-c', '--clean', help='remove simulation files',
+                        action='store_true')
     parser.add_argument('-me', '--max_epochs', type=int, nargs='?', default=1000,
                         help='# of training iterations (default: 1000)')
     parser.add_argument('-hn', '--hidden-neurons', type=int, nargs='?', default=10,
@@ -43,6 +46,13 @@ def get_parser():
     parser.add_argument('-v', '--verbose', help='print status messages',
                         action='store_true')
     return parser
+
+
+def cleanup():
+    """Remove all simulation files in current directory"""
+    for sim_file in glob.glob('simulation*.txt'):
+        os.remove(sim_file)
+        print('Removed {}'.format(sim_file))
 
 
 def train(args, training_ds):
@@ -100,23 +110,23 @@ def bit_array_transform(output):
     """Transforms activated outputs into a bit array representation"""
     def bit_transform(arr):
         # Largest weight becomes 1 in the bit array
-        bit_arr = np.copy(arr)
+        bit_arr = copy(arr)
         greatest = bit_arr.argmax()
         bit_arr[:] = 0
         bit_arr[greatest] = 1
         return bit_arr
-    
+
     return [bit_transform(x) for x in output]
 
 
-def evaluate(args, trainer, ff_network, training_ds, testing_ds):
+def evaluate(args, trainer, ff_network, training_ds, testing_ds, sim_num, header):
     """Evaluate the networks hit rate and MSE on training and testing"""
     if args['verbose']:
         print('\nEvaluating the networks hit rate and MSE:')
     print('\tTotal epochs: %4d' % trainer.totalepochs)
 
-    def print_dataset_eval(dataset):
-        """Print dataset hit rate and MSE"""
+    def dataset_eval(dataset):
+        """Return dataset hit rate and MSE"""
         # Transform output values to bit vectors, similar to the targets
         predicted = bit_array_transform(ff_network.activate(x)
                                         for x in dataset['input'])
@@ -128,27 +138,50 @@ def evaluate(args, trainer, ff_network, training_ds, testing_ds):
 
         hits = Validator.classificationPerformance(predicted_pos, target_pos)
         mse = Validator.MSE(predicted, target)
+        return hits, mse
 
-        print('\t\tHit rate: {}'.format(hits))
-        print('\t\tMSE: {}'.format(mse))
+    def write_eval_results():
+        """Write simulation results to a pipe-delimited text file"""
+        with open('simulation{}.txt'.format(sim_num), 'a') as sim_file:
+            sim_file.write('{}\n'.format('|'.join(str(args[x]) for x in header)))
 
     print('\n\tTraining set:')
-    print_dataset_eval(training_ds)
+    tr_hits, tr_mse = dataset_eval(training_ds)
+    print('\t\tHit rate: {}'.format(tr_hits))
+    print('\t\tMSE: {}'.format(tr_mse))
 
     print('\n\tTesting set:')
-    print_dataset_eval(testing_ds)
+    te_hits, te_mse = dataset_eval(testing_ds)
+    print('\t\tHit rate: {}'.format(te_hits))
+    print('\t\tMSE: {}'.format(te_mse))
+
+    # Write simulation results for testing set only
+    args['hits'] = te_hits
+    args['mse'] = te_mse
+    write_eval_results()
 
 
-def run_simulation(args):
+def run_simulation(args, sim_num=1, header=None):
     """Run ANN simulation"""
+    # Always run verbosely (for now)
+    args['verbose'] = True
+
     # Load training and test data
     training_ds, testing_ds = load_data(args)
 
     # Build and train feed-forward neural network
     trainer, ff_network = train(args, training_ds)
 
+    # Initialize results output file with given or default header
+    if header is None:
+        header = ['hidden_neurons', 'learning_rate', 'max_epochs',
+                  'activation', 'hits', 'mse']
+
+    with open('simulation{}.txt'.format(sim_num), 'a') as sim_file:
+        sim_file.write('{}\n'.format('|'.join(header)))
+
     # Use the trainer to evaluate the network on the training and test data
-    evaluate(args, trainer, ff_network, training_ds, testing_ds)
+    evaluate(args, trainer, ff_network, training_ds, testing_ds, sim_num, header)
 
 
 def command_line_runner():
