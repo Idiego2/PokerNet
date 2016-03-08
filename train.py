@@ -149,7 +149,7 @@ def evaluate(args, trainer, ff_network, training_ds, testing_ds, sim_num, header
     write_eval_results()
 
 
-def run_simulation(args, sim_num=1, header=None):
+def run_simulation(args, sim_num=0, header=None):
     """Run ANN simulation"""
     # Always run verbosely (for now)
     args['verbose'] = True
