@@ -14,7 +14,6 @@ from load import load_data
 
 
 TRAIN_METHODS = {'gdm': BackpropTrainer,
-                 'scg': None,
                  'rp': RPropMinusTrainer}
 
 ACTIVATION_FNS = {'purelin': LinearLayer,
