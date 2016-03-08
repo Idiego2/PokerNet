@@ -116,19 +116,20 @@ def evaluate(args, trainer, ff_network, training_ds, testing_ds):
 
     def print_dataset_eval(dataset):
         """Print dataset hit rate and MSE"""
+        # Transform output values to bit vectors, similar to the targets
         predicted = bit_array_transform(ff_network.activate(x)
                                         for x in dataset['input'])
-        hits = 0
-        mse = 0
+        target = dataset['target']
 
-        for pred, targ in izip(predicted, dataset['target']):
-            hits += Validator.classificationPerformance(pred, targ)
-            mse += Validator.MSE(pred, targ)
-        total_hits = hits / len(predicted)
-        total_mse = mse / len(predicted)
+        # Lists of positions holding predicted and target classes to compare
+        predicted_pos = [x.searchsorted(1) for x in predicted]
+        target_pos = [x.searchsorted(1) for x in target]
 
-        print('\t\tHit rate: {}'.format(total_hits))
-        print('\t\tMSE: {}'.format(total_mse))
+        hits = Validator.classificationPerformance(predicted_pos, target_pos)
+        mse = Validator.MSE(predicted, target)
+
+        print('\t\tHit rate: {}'.format(hits))
+        print('\t\tMSE: {}'.format(mse))
 
     print('\n\tTraining set:')
     print_dataset_eval(training_ds)
