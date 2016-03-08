@@ -1,21 +1,24 @@
 #!/usr/bin/env python
 """PokerNet simulation suite"""
 
+from __future__ import print_function
+from multiprocessing import Pool
+
 from train import run_simulation, get_parser
 
 
-def run_simulations():
-    """Run ANN training simulations with various methods and parameters"""
-    # Initialize args with program defaults
-    init_args = vars(get_parser().parse_args())
+# Initialize args with program defaults
+INIT_ARGS = vars(get_parser().parse_args())
 
-    # Table 1: Training results for different neuron numbers
+
+def table_one():
+    """Table 1: Training results for different neuron numbers"""
     simulation_num = 1
     print('\n** Running simulation {} **\n'.format(simulation_num))
     table_header = ['hidden_neurons', 'learning_rate', 'max_epochs',
                     'activation', 'hits', 'mse']
 
-    args = init_args.copy()
+    args = INIT_ARGS.copy()
     args.update({'method': 'gdm',
                  'activation': 'purelin',
                  'max_epochs': 1000,
@@ -24,13 +27,15 @@ def run_simulations():
         args['hidden_neurons'] = i
         run_simulation(args, sim_num=simulation_num, header=table_header)
 
-    # Table 2: Effect of the change in learning rate value
-    simulation_num += 1
+
+def table_two():
+    """Table 2: Effect of the change in learning rate value"""
+    simulation_num = 2
     print('\n** Running simulation {} **\n'.format(simulation_num))
     table_header = ['hidden_neurons', 'max_epochs', 'learning_rate',
                     'activation', 'hits', 'mse']
 
-    args = init_args.copy()
+    args = INIT_ARGS.copy()
     args.update({'method': 'gdm',
                  'activation': 'purelin',
                  'max_epochs': 1000,
@@ -39,13 +44,15 @@ def run_simulations():
         args['hidden_neurons'] = i
         run_simulation(args, sim_num=simulation_num, header=table_header)
 
-    # Table 3: Effect of different epoch limits for 10 neurons
-    simulation_num += 1
+
+def table_three():
+    """Table 3: Effect of different epoch limits for 10 neurons"""
+    simulation_num = 3
     print('\n** Running simulation {} **\n'.format(simulation_num))
     table_header = ['hidden_neurons', 'max_epochs', 'learning_rate',
                     'hits', 'mse']
 
-    args = init_args.copy()
+    args = INIT_ARGS.copy()
     args.update({'method': 'gdm',
                  'activation': 'purelin',
                  'learning_rate': 0.2,
@@ -54,13 +61,15 @@ def run_simulations():
         args['epochs'] = i
         run_simulation(args, sim_num=simulation_num, header=table_header)
 
-    # Table 4: Effect of different epoch limits for 30 neurons
-    simulation_num += 1
+
+def table_four():
+    """Table 4: Effect of different epoch limits for 30 neurons"""
+    simulation_num = 4
     print('\n** Running simulation {} **\n'.format(simulation_num))
     table_header = ['hidden_neurons', 'max_epochs', 'learning_rate',
                     'hits', 'mse']
 
-    args = init_args.copy()
+    args = INIT_ARGS.copy()
     args.update({'method': 'gdm',
                  'activation': 'purelin',
                  'learning_rate': 0.2,
@@ -69,13 +78,15 @@ def run_simulations():
         args['epochs'] = i
         run_simulation(args, sim_num=simulation_num, header=table_header)
 
-    # Table 5: Effect of different epoch limits for 50 neurons
-    simulation_num += 1
+
+def table_five():
+    """Table 5: Effect of different epoch limits for 50 neurons"""
+    simulation_num = 5
     print('\n** Running simulation {} **\n'.format(simulation_num))
     table_header = ['hidden_neurons', 'max_epochs', 'learning_rate',
                     'hits', 'mse']
 
-    args = init_args.copy()
+    args = INIT_ARGS.copy()
     args.update({'method': 'gdm',
                  'activation': 'purelin',
                  'learning_rate': 0.2,
@@ -84,13 +95,15 @@ def run_simulations():
         args['epochs'] = i
         run_simulation(args, sim_num=simulation_num, header=table_header)
 
-    # Table 6: comparison of three methods for 10 neurons
-    simulation_num += 1
+
+def table_six():
+    """Table 6: comparison of three methods for 10 neurons"""
+    simulation_num = 6
     print('\n** Running simulation {} **\n'.format(simulation_num))
     table_header = ['hidden_neurons', 'method', 'learning_rate', 'max_epochs',
                     'hits', 'mse']
 
-    args = init_args.copy()
+    args = INIT_ARGS.copy()
     args.update({'activation': 'purelin',
                  'max_epochs': 1000,
                  'hidden_neurons': 10})
@@ -101,13 +114,15 @@ def run_simulations():
             args['learning_rate'] = lrn_rate
             run_simulation(args, sim_num=simulation_num, header=table_header)
 
-    # Table 7: Effect of transfer function for resilient back-propagation method for 1000 iteration
-    simulation_num += 1
+
+def table_seven():
+    """Table 7: Effect of transfer function for resilient back-propagation method for 1000 iteration"""
+    simulation_num = 7
     print('\n** Running simulation {} **\n'.format(simulation_num))
     table_header = ['hidden_neurons', 'method', 'max_epochs', 'learning_rate',
                     'hits', 'mse']
 
-    args = init_args.copy()
+    args = INIT_ARGS.copy()
     args.update({'method': 'rp',
                  'max_epochs': 1000,
                  'hidden_neurons': 10})
@@ -121,13 +136,15 @@ def run_simulations():
                 args['learning_rate'] = lrn_rate
                 run_simulation(args, sim_num=simulation_num, header=table_header)
 
-    # Table 8: Effect of transfer function for resilient back-propagation method for 2000 iteration
-    simulation_num += 1
+
+def table_eight():
+    """Table 8: Effect of transfer function for resilient back-propagation method for 2000 iteration"""
+    simulation_num = 8
     print('\n** Running simulation {} **\n'.format(simulation_num))
     table_header = ['hidden_neurons', 'method', 'max_epochs', 'learning_rate',
                     'hits', 'mse']
 
-    args = init_args.copy()
+    args = INIT_ARGS.copy()
     args.update({'method': 'rp',
                  'max_epochs': 2000,
                  'hidden_neurons': 10})
@@ -140,14 +157,14 @@ def run_simulations():
             for lrn_rate in (0.2, 0.02):
                 args['learning_rate'] = lrn_rate
                 run_simulation(args, sim_num=simulation_num, header=table_header)
-
-    # Table 9: Effect of transfer function for scaled conjugate gradient method
-    simulation_num += 1
+def table_nine():
+    """Table 9: Effect of transfer function for scaled conjugate gradient method"""
+    simulation_num = 9
     print('\n** Running simulation {} **\n'.format(simulation_num))
     table_header = ['hidden_neurons', 'method', 'learning_rate', 'max_epochs',
                     'hits', 'mse']
 
-    args = init_args.copy()
+    args = INIT_ARGS.copy()
     args.update({'method': 'scg',
                  'max_epochs': 1000,
                  'hidden_neurons': 10})
@@ -158,18 +175,17 @@ def run_simulations():
             args['learning_rate'] = lrn_rate
             run_simulation(args, sim_num=simulation_num, header=table_header)
 
-    return  # Returning here because have yet to figure out validation limit for table 10
-            # as well as the best train results for table 11
 
-    # Table 10: Effect of transfer function for scaled conjugate gradient method
+def table_ten():
+    """Table 10: Effect of transfer function for scaled conjugate gradient method"""
     # Vary validation limit (what is that?)... also need train stop criteria
     #                                           (validation limit reached or max epoch reached)
-    simulation_num += 1
+    simulation_num = 10
     print('\n** Running simulation {} **\n'.format(simulation_num))
     table_header = ['hidden_neurons', 'validation_limit', 'learning_rate', 'max_epochs',
                     'hits', 'stop_criteria']
 
-    args = init_args.copy()
+    args = INIT_ARGS.copy()
     args.update({'method': 'scg',
                  'hidden_neurons': 50})
     validation_limit = 100
@@ -189,14 +205,16 @@ def run_simulations():
         args['learning_rate'] = lrn_rate
         run_simulation(args, sim_num=simulation_num, header=table_header)
 
-    # Table 11: Test results for various networks
+
+def table_eleven():
+    """Table 11: Test results for various networks"""
     # takes the best train result. how many runs to examine?
-    simulation_num += 1
+    simulation_num = 11
     print('\n** Running simulation {} **\n'.format(simulation_num))
     table_header = ['hidden_neurons', 'method', 'learning_rate', 'max_epochs',
                     'hits', 'mse']
 
-    args = init_args.copy()
+    args = INIT_ARGS.copy()
     args.update({'hidden_neurons': 50,
                  'max_epochs': 2000})
     for lrn_rate in (0.02, 0.2):
@@ -204,6 +222,31 @@ def run_simulations():
         for mthd in ('scg', 'rp'):
             args['method'] = mthd
             run_simulation(args, sim_num=simulation_num, header=table_header)
+
+
+def run_simulations():
+    """Run ANN training simulations with various methods and parameters"""
+    pool = Pool()
+    t1 = pool.apply_async(table_one())
+    t1.get()
+    t2 = pool.apply_async(table_two())
+    t2.get()
+    t3 = pool.apply_async(table_three())
+    t3.get()
+    t4 = pool.apply_async(table_four())
+    t4.get()
+    t5 = pool.apply_async(table_five())
+    t5.get()
+    t6 = pool.apply_async(table_six())
+    t6.get()
+    t7 = pool.apply_async(table_seven())
+    t7.get()
+    t8 = pool.apply_async(table_eight())
+    t8.get()
+    t9 = pool.apply_async(table_nine())
+    t9.get()
+    #table_ten()
+    #table_eleven()
 
 
 if __name__ == '__main__':
