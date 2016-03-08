@@ -71,14 +71,15 @@ def train(args, training_ds):
         print('Network built.')
 
     # Train using user-specified method and training data for n epochs
+    # Set default momentum for gradient descent with momentum
+    momentum = 0.0
+    if args['method'] == 'gdm':
+        momentum = 0.7
+
     if args['verbose']:
         print('\nTraining network:')
         print('\tmax epochs: {}'.format(args['max_epochs']))
         print('\ttraining method: {}'.format(args['method']))
-        if args['method'] == 'gdm':
-            momentum = 0.7
-        else:
-            momentum = 0.0
         print('\tmomentum: {}'.format(momentum))
         print('\tlearning rate: {}'.format(args['learning_rate']))
 
