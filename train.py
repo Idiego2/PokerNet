@@ -95,6 +95,19 @@ def train(args, training_ds):
     return trainer, ff_network
 
 
+def bit_array_transform(output):
+    """Transforms activated outputs into a bit array representation"""
+    def bit_transform(arr):
+        # Largest weight becomes 1 in the bit array
+        bit_arr = np.copy(arr)
+        greatest = bit_arr.argmax()
+        bit_arr[:] = 0
+        bit_arr[greatest] = 1
+        return bit_arr
+    
+    return [bit_transform(x) for x in output]
+
+
 def evaluate(args, trainer, ff_network, training_ds, testing_ds):
     """Evaluate the networks hit rate and MSE on training and testing"""
     if args['verbose']:
@@ -103,7 +116,8 @@ def evaluate(args, trainer, ff_network, training_ds, testing_ds):
 
     def print_dataset_eval(dataset):
         """Print dataset hit rate and MSE"""
-        predicted = [ff_network.activate(x) for x in dataset['input']]
+        predicted = bit_array_transform(ff_network.activate(x)
+                                        for x in dataset['input'])
         hits = 0
         mse = 0
 
