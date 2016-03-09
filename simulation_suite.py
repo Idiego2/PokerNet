@@ -21,7 +21,7 @@ def table_one():
     args.update({'method': 'gdm',
                  'activation': 'purelin',
                  'max_epochs': 100,
-                 'learning_rate': 0.02})
+                 'learning_rate': 0.001})
     for i in (10, 30, 50):
         args['hidden_neurons'] = i
         run_simulation(args, sim_num=simulation_num, header=table_header)
@@ -38,7 +38,7 @@ def table_two():
     args.update({'method': 'gdm',
                  'activation': 'purelin',
                  'max_epochs': 100,
-                 'learning_rate': 0.2})
+                 'learning_rate': 0.01})
     for i in (10, 30, 50):
         args['hidden_neurons'] = i
         run_simulation(args, sim_num=simulation_num, header=table_header)
@@ -54,7 +54,7 @@ def table_three():
     args = INIT_ARGS.copy()
     args.update({'method': 'gdm',
                  'activation': 'purelin',
-                 'learning_rate': 0.2,
+                 'learning_rate': 0.01,
                  'hidden_neurons': 10})
     for i in (100, 200, 300):
         args['max_epochs'] = i
@@ -71,7 +71,7 @@ def table_four():
     args = INIT_ARGS.copy()
     args.update({'method': 'gdm',
                  'activation': 'purelin',
-                 'learning_rate': 0.2,
+                 'learning_rate': 0.01,
                  'hidden_neurons': 30})
     for i in (100, 200, 300):
         args['max_epochs'] = i
@@ -88,7 +88,7 @@ def table_five():
     args = INIT_ARGS.copy()
     args.update({'method': 'gdm',
                  'activation': 'purelin',
-                 'learning_rate': 0.2,
+                 'learning_rate': 0.01,
                  'hidden_neurons': 50})
     for i in (100, 200, 300):
         args['max_epochs'] = i
@@ -109,7 +109,7 @@ def table_six():
     for mthd in ('gdm', 'rp'):
         args['method'] = mthd
 
-        for lrn_rate in (0.2, 0.02):
+        for lrn_rate in (0.01, 0.001):
             args['learning_rate'] = lrn_rate
             run_simulation(args, sim_num=simulation_num, header=table_header)
 
@@ -131,7 +131,7 @@ def table_seven():
         for act_fn in ('purelin', 'tansig'):
             args['activation'] = act_fn
 
-            for lrn_rate in (0.2, 0.02):
+            for lrn_rate in (0.01, 0.001):
                 args['learning_rate'] = lrn_rate
                 run_simulation(args, sim_num=simulation_num, header=table_header)
 
@@ -153,7 +153,7 @@ def table_eight():
         for act_fn in ('purelin', 'tansig'):
             args['activation'] = act_fn
 
-            for lrn_rate in (0.2, 0.02):
+            for lrn_rate in (0.01, 0.001):
                 args['learning_rate'] = lrn_rate
                 run_simulation(args, sim_num=simulation_num, header=table_header)
 
@@ -163,12 +163,13 @@ def table_nine():
     simulation_num = 9
     print('\n** Running simulation {} **\n'.format(simulation_num))
     table_header = ['hidden_neurons', 'method', 'learning_rate', 'max_epochs',
-                    'hits', 'mse']
+                    'hits', 'mse', 'write_training_results']
 
     args = INIT_ARGS.copy()
     args.update({'hidden_neurons': 50,
-                 'max_epochs': 200})
-    for lrn_rate in (0.02, 0.2):
+                 'max_epochs': 200,
+                 'write_training_results': True})
+    for lrn_rate in (0.001, 0.01):
         args['learning_rate'] = lrn_rate
         for mthd in ('gdm', 'rp'):
             args['method'] = mthd
@@ -185,7 +186,7 @@ def run_simulations():
     table_six()
     table_seven()
     table_eight()
-    
+
     # Run three times to later take best results
     table_nine()
     table_nine()

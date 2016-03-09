@@ -32,8 +32,8 @@ def get_parser():
     parser.add_argument('-hn', '--hidden-neurons', type=int, nargs='?', default=10,
                         help='# of hidden neuron units (default: 10)')
     parser.add_argument('-lr', '--learning-rate', type=float,
-                        nargs='?', default=0.2,
-                        help='controls size of weight changes (default: 0.2)')
+                        nargs='?', default=0.01,
+                        help='controls size of weight changes (default: 0.01)')
     parser.add_argument('-m', '--method', type=str, nargs='?', default='rp',
                         help='training method (default: rp)')
     parser.add_argument('-nt', '--num-testing', type=int,
