@@ -27,8 +27,8 @@ def get_parser():
                         help='hidden layer activation fn (default: tansig)')
     parser.add_argument('-me', '--max_epochs', type=int, nargs='?', default=1000,
                         help='# of training iterations (default: 1000)')
-    parser.add_argument('-mo', '--momentum', type=float, nargs='?', default=0.7,
-                        help='weight change momentum (default: 0.7)')
+    parser.add_argument('-mo', '--momentum', type=float, nargs='?', default=0.0,
+                        help='weight change momentum (default: 0.0)')
     parser.add_argument('-hn', '--hidden-neurons', type=int, nargs='?', default=10,
                         help='# of hidden neuron units (default: 10)')
     parser.add_argument('-lr', '--learning-rate', type=float,
