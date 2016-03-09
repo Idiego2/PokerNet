@@ -1,0 +1,6 @@
+hidden_neurons|max_epochs|learning_rate|hits|mse
+50|100|0.01|0.50272|0.099456
+hidden_neurons|max_epochs|learning_rate|hits|mse
+50|200|0.01|0.45196|0.109608
+hidden_neurons|max_epochs|learning_rate|hits|mse
+50|300|0.01|0.4658|0.10684
