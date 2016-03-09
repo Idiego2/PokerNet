@@ -6,15 +6,14 @@ from argparse import ArgumentParser as Parser
 
 from numpy import copy
 from pybrain.structure.modules import LinearLayer, SoftmaxLayer, TanhLayer
-from pybrain.supervised.trainers import BackpropTrainer, RPropMinusTrainer
+from pybrain.supervised.trainers import RPropMinusTrainer
 from pybrain.tools.shortcuts import buildNetwork
 from pybrain.tools.validation import Validator
 
 from load import load_data
 
 
-TRAIN_METHODS = {'gdm': BackpropTrainer,
-                 'rp': RPropMinusTrainer}
+TRAIN_METHODS = {'rp': RPropMinusTrainer}
 
 ACTIVATION_FNS = {'purelin': LinearLayer,
                   'tansig': TanhLayer}
@@ -28,6 +27,8 @@ def get_parser():
                         help='hidden layer activation fn (default: tansig)')
     parser.add_argument('-me', '--max_epochs', type=int, nargs='?', default=1000,
                         help='# of training iterations (default: 1000)')
+    parser.add_argument('-mo', '--momentum', type=float, nargs='?', default=0.7,
+                        help='weight change momentum (default: 0.7)')
     parser.add_argument('-hn', '--hidden-neurons', type=int, nargs='?', default=10,
                         help='# of hidden neuron units (default: 10)')
     parser.add_argument('-lr', '--learning-rate', type=float,
@@ -69,21 +70,16 @@ def train(args, training_ds):
         print('Network built.')
 
     # Train using user-specified method and training data for n epochs
-    # Set default momentum for gradient descent with momentum
-    momentum = 0.0
-    if args['method'] == 'gdm':
-        momentum = 0.7
-
     if args['verbose']:
         print('\nTraining network:')
         print('\tmax epochs: {}'.format(args['max_epochs']))
         print('\ttraining method: {}'.format(args['method']))
-        print('\tmomentum: {}'.format(momentum))
+        print('\tmomentum: {}'.format(args['momentum']))
         print('\tlearning rate: {}'.format(args['learning_rate']))
 
     trainer = TRAIN_METHODS[args['method']](ff_network, dataset=training_ds,
                                             verbose=args['verbose'],
-                                            momentum=momentum,
+                                            momentum=args['momentum'],
                                             learningrate=args['learning_rate'])
 
     try:

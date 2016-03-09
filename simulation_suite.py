@@ -19,7 +19,7 @@ def table_one():
                     'activation', 'hits', 'mse']
 
     args = INIT_ARGS.copy()
-    args.update({'method': 'gdm',
+    args.update({'method': 'rp',
                  'activation': 'purelin',
                  'max_epochs': 100,
                  'learning_rate': 0.02})
@@ -36,7 +36,7 @@ def table_two():
                     'activation', 'hits', 'mse']
 
     args = INIT_ARGS.copy()
-    args.update({'method': 'gdm',
+    args.update({'method': 'rp',
                  'activation': 'purelin',
                  'max_epochs': 100,
                  'learning_rate': 0.2})
@@ -53,7 +53,7 @@ def table_three():
                     'hits', 'mse']
 
     args = INIT_ARGS.copy()
-    args.update({'method': 'gdm',
+    args.update({'method': 'rp',
                  'activation': 'purelin',
                  'learning_rate': 0.2,
                  'hidden_neurons': 10})
@@ -70,7 +70,7 @@ def table_four():
                     'hits', 'mse']
 
     args = INIT_ARGS.copy()
-    args.update({'method': 'gdm',
+    args.update({'method': 'rp',
                  'activation': 'purelin',
                  'learning_rate': 0.2,
                  'hidden_neurons': 30})
@@ -87,7 +87,7 @@ def table_five():
                     'hits', 'mse']
 
     args = INIT_ARGS.copy()
-    args.update({'method': 'gdm',
+    args.update({'method': 'rp',
                  'activation': 'purelin',
                  'learning_rate': 0.2,
                  'hidden_neurons': 50})
@@ -97,29 +97,10 @@ def table_five():
 
 
 def table_six():
-    """Table 6: comparison of two methods for 10 neurons"""
+    """Table 6: Effect of transfer function for resilient back-propagation method for 100 iteration"""
     simulation_num = 6
     print('\n** Running simulation {} **\n'.format(simulation_num))
-    table_header = ['hidden_neurons', 'method', 'learning_rate', 'max_epochs',
-                    'hits', 'mse']
-
-    args = INIT_ARGS.copy()
-    args.update({'activation': 'purelin',
-                 'max_epochs': 100,
-                 'hidden_neurons': 10})
-    for mthd in ('gdm', 'rp'):
-        args['method'] = mthd
-
-        for lrn_rate in (0.2, 0.02):
-            args['learning_rate'] = lrn_rate
-            run_simulation(args, sim_num=simulation_num, header=table_header)
-
-
-def table_seven():
-    """Table 7: Effect of transfer function for resilient back-propagation method for 100 iteration"""
-    simulation_num = 7
-    print('\n** Running simulation {} **\n'.format(simulation_num))
-    table_header = ['hidden_neurons', 'method', 'max_epochs', 'learning_rate',
+    table_header = ['hidden_neurons', 'max_epochs', 'learning_rate',
                     'hits', 'mse']
 
     args = INIT_ARGS.copy()
@@ -137,11 +118,11 @@ def table_seven():
                 run_simulation(args, sim_num=simulation_num, header=table_header)
 
 
-def table_eight():
-    """Table 8: Effect of transfer function for resilient back-propagation method for 200 iteration"""
-    simulation_num = 8
+def table_seven():
+    """Table 7: Effect of transfer function for resilient back-propagation method for 200 iteration"""
+    simulation_num = 7
     print('\n** Running simulation {} **\n'.format(simulation_num))
-    table_header = ['hidden_neurons', 'method', 'max_epochs', 'learning_rate',
+    table_header = ['hidden_neurons', 'max_epochs', 'learning_rate',
                     'hits', 'mse']
 
     args = INIT_ARGS.copy()
@@ -159,22 +140,20 @@ def table_eight():
                 run_simulation(args, sim_num=simulation_num, header=table_header)
 
 
-def table_nine():
-    """Table 9: Test results for various networks"""
-    # takes the best train result. how many runs to examine?
-    simulation_num = 9
+def table_eight():
+    """Table 8: Take the best results for various learning rates"""
+    simulation_num = 8
     print('\n** Running simulation {} **\n'.format(simulation_num))
-    table_header = ['hidden_neurons', 'method', 'learning_rate', 'max_epochs',
+    table_header = ['hidden_neurons', 'learning_rate', 'max_epochs',
                     'hits', 'mse']
 
     args = INIT_ARGS.copy()
-    args.update({'hidden_neurons': 50,
+    args.update({'method': 'rp',
+                 'hidden_neurons': 50,
                  'max_epochs': 200})
     for lrn_rate in (0.02, 0.2):
         args['learning_rate'] = lrn_rate
-        for mthd in ('gdm', 'rp'):
-            args['method'] = mthd
-            run_simulation(args, sim_num=simulation_num, header=table_header)
+        run_simulation(args, sim_num=simulation_num, header=table_header)
 
 
 def run_simulations():
@@ -189,8 +168,11 @@ def run_simulations():
     p5 = pool.apply_async(table_five())
     p6 = pool.apply_async(table_six())
     p7 = pool.apply_async(table_seven())
+
+    # Run three times to later take best results
     p8 = pool.apply_async(table_eight())
-    #p9 = pool.apply_async(table_nine())
+    p8 = pool.apply_async(table_eight())
+    p8 = pool.apply_async(table_eight())
 
     pool.close()
     pool.join()
