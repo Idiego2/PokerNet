@@ -2,7 +2,6 @@
 """PokerNet simulation suite"""
 
 from __future__ import print_function
-from multiprocessing import Pool
 
 from train import run_simulation, get_parser
 
@@ -158,24 +157,18 @@ def table_eight():
 
 def run_simulations():
     """Run ANN training simulations with various methods and parameters"""
-    # Run processes asynchronously
-    pool = Pool(processes=8)
-
-    p1 = pool.apply_async(table_one())
-    p2 = pool.apply_async(table_two())
-    p3 = pool.apply_async(table_three())
-    p4 = pool.apply_async(table_four())
-    p5 = pool.apply_async(table_five())
-    p6 = pool.apply_async(table_six())
-    p7 = pool.apply_async(table_seven())
+    table_one()
+    table_two()
+    table_three()
+    table_four()
+    table_five()
+    table_six()
+    table_seven()
 
     # Run three times to later take best results
-    p8 = pool.apply_async(table_eight())
-    p8 = pool.apply_async(table_eight())
-    p8 = pool.apply_async(table_eight())
-
-    pool.close()
-    pool.join()
+    table_eight()
+    table_eight()
+    table_eight()
 
 
 if __name__ == '__main__':
