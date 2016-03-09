@@ -3,8 +3,8 @@
 
 from __future__ import print_function
 from argparse import ArgumentParser as Parser
-import glob
 import os
+import shutil
 
 
 def get_parser():
@@ -14,11 +14,14 @@ def get_parser():
                         action='store_true')
     return parser
 
+
 def cleanup():
-    """Remove all simulation files in current directory"""
-    for sim_file in glob.glob('simulation*.txt'):
-        os.remove(sim_file)
-        print('Removed {}'.format(sim_file))
+    """Remove results"""
+    if os.path.exists('results'):
+        shutil.rmtree('results')
+        print('Removed results/ directory.')
+    else:
+        print('No results directory found.')
 
 
 def command_line_runner():
