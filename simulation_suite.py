@@ -118,7 +118,7 @@ def table_seven():
     """Table 7: Effect of transfer function for resilient back-propagation method for 100 iteration"""
     simulation_num = 7
     print('\n** Running simulation {} **\n'.format(simulation_num))
-    table_header = ['hidden_neurons', 'method', 'max_epochs', 'learning_rate',
+    table_header = ['hidden_neurons', 'activation', 'method', 'max_epochs', 'learning_rate',
                     'hits', 'mse']
 
     args = INIT_ARGS.copy()
@@ -140,13 +140,12 @@ def table_eight():
     """Table 8: Effect of transfer function for resilient back-propagation method for 200 iteration"""
     simulation_num = 8
     print('\n** Running simulation {} **\n'.format(simulation_num))
-    table_header = ['hidden_neurons', 'method', 'max_epochs', 'learning_rate',
+    table_header = ['hidden_neurons', 'activation', 'method', 'max_epochs', 'learning_rate',
                     'hits', 'mse']
 
     args = INIT_ARGS.copy()
     args.update({'method': 'rp',
-                 'max_epochs': 200,
-                 'hidden_neurons': 10})
+                 'max_epochs': 200})
     for n_num in (10, 30, 50):
         args['hidden_neurons'] = n_num
 
