@@ -39,6 +39,8 @@ def get_parser():
     parser.add_argument('-nt', '--num-testing', type=int,
                         nargs='?', default='25000',
                         help='# of testing inputs (default: 25000)')
+    parser.add_argument('-wtr', '--write-training-results', action='store_true',
+                        help='write training results as well as testing')
     parser.add_argument('-v', '--verbose', help='print status messages',
                         action='store_true')
     return parser
@@ -142,7 +144,14 @@ def evaluate(args, trainer, ff_network, training_ds, testing_ds, sim_num, header
     print('\t\tHit rate: {}'.format(te_hits))
     print('\t\tMSE: {}'.format(te_mse))
 
-    # Write simulation results for testing set only
+    # Write simulation results for testing set only (unless specified)
+    if args['write_training_results']:
+        args['hits'] = tr_hits
+        args['mse'] = tr_mse
+
+        write_eval_results()
+        args['write_training_results'] = False
+
     args['hits'] = te_hits
     args['mse'] = te_mse
     write_eval_results()
