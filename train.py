@@ -3,6 +3,7 @@
 
 from __future__ import absolute_import, print_function
 from argparse import ArgumentParser as Parser
+import os
 
 from numpy import copy
 from pybrain.structure.modules import LinearLayer, SoftmaxLayer, TanhLayer
@@ -128,7 +129,7 @@ def evaluate(args, trainer, ff_network, training_ds, testing_ds, sim_num, header
 
     def write_eval_results():
         """Write simulation results to a pipe-delimited text file"""
-        with open('simulation{}.txt'.format(sim_num), 'a') as sim_file:
+        with open('results/simulation{}.txt'.format(sim_num), 'a') as sim_file:
             sim_file.write('{}\n'.format('|'.join(str(args[x]) for x in header)))
 
     print('\n\tTraining set:')
@@ -163,7 +164,12 @@ def run_simulation(args, sim_num=0, header=None):
         header = ['hidden_neurons', 'learning_rate', 'max_epochs',
                   'activation', 'hits', 'mse']
 
-    with open('simulation{}.txt'.format(sim_num), 'a') as sim_file:
+    # Create results directory to hold simulation files if not existing
+    if not os.path.exists('results'):
+        os.makedirs('results')
+
+    # Write table header to simulation file
+    with open('results/simulation{}.txt'.format(sim_num), 'a') as sim_file:
         sim_file.write('{}\n'.format('|'.join(header)))
 
     # Use the trainer to evaluate the network on the training and test data
