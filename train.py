@@ -6,14 +6,15 @@ from argparse import ArgumentParser as Parser
 
 from numpy import copy
 from pybrain.structure.modules import LinearLayer, SoftmaxLayer, TanhLayer
-from pybrain.supervised.trainers import RPropMinusTrainer
+from pybrain.supervised.trainers import BackpropTrainer, RPropMinusTrainer
 from pybrain.tools.shortcuts import buildNetwork
 from pybrain.tools.validation import Validator
 
 from load import load_data
 
 
-TRAIN_METHODS = {'rp': RPropMinusTrainer}
+TRAIN_METHODS = {'gdm': BackpropTrainer,
+                 'rp': RPropMinusTrainer}
 
 ACTIVATION_FNS = {'purelin': LinearLayer,
                   'tansig': TanhLayer}
@@ -27,8 +28,6 @@ def get_parser():
                         help='hidden layer activation fn (default: tansig)')
     parser.add_argument('-me', '--max_epochs', type=int, nargs='?', default=1000,
                         help='# of training iterations (default: 1000)')
-    parser.add_argument('-mo', '--momentum', type=float, nargs='?', default=0.0,
-                        help='weight change momentum (default: 0.0)')
     parser.add_argument('-hn', '--hidden-neurons', type=int, nargs='?', default=10,
                         help='# of hidden neuron units (default: 10)')
     parser.add_argument('-lr', '--learning-rate', type=float,
@@ -70,16 +69,19 @@ def train(args, training_ds):
         print('Network built.')
 
     # Train using user-specified method and training data for n epochs
+    momentum = 0.0
+    if args['method'] == 'gdm':
+        momentum = 0.7
     if args['verbose']:
         print('\nTraining network:')
         print('\tmax epochs: {}'.format(args['max_epochs']))
         print('\ttraining method: {}'.format(args['method']))
-        print('\tmomentum: {}'.format(args['momentum']))
+        print('\tmomentum: {}'.format(momentum))
         print('\tlearning rate: {}'.format(args['learning_rate']))
 
     trainer = TRAIN_METHODS[args['method']](ff_network, dataset=training_ds,
                                             verbose=args['verbose'],
-                                            momentum=args['momentum'],
+                                            momentum=momentum,
                                             learningrate=args['learning_rate'])
 
     try:
@@ -117,8 +119,8 @@ def evaluate(args, trainer, ff_network, training_ds, testing_ds, sim_num, header
         target = dataset['target']
 
         # Lists of positions holding predicted and target classes to compare
-        predicted_pos = [x.searchsorted(1) for x in predicted]
-        target_pos = [x.searchsorted(1) for x in target]
+        predicted_pos = [list(x).index(1) for x in predicted]
+        target_pos = [list(x).index(1) for x in target]
 
         hits = Validator.classificationPerformance(predicted_pos, target_pos)
         mse = Validator.MSE(predicted, target)
