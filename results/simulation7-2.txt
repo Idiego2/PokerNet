@@ -1,0 +1,6 @@
+hidden_neurons|activation|method|max_epochs|learning_rate|hits|mse
+30|purelin|rp|100|0.02|0.47|0.106
+30|tansig|rp|100|0.02|0.52484|0.095032
+30|purelin|rp|100|0.2|0.4518|0.10964
+30|tansig|rp|100|0.2|0.53192|0.093616
+50|purelin|rp|100|0.2|0.46568|0.106864
