@@ -34,7 +34,7 @@ In Table 6 we attempt to compare our two methods using the same parameters for e
 
 We had many constraints in this project, mostly time and processing power, and also difficulty of finding a proper neural network implementation in Python. We would have also enjoyed to examine the network with a larger set of training methods, which themselves would introduce more learning parameters as well. Our results were consistent with the original study, but with much less statistical accuracy due to our smaller amount of training epochs, so we would wish to reproduce this project with a higher amount of iterations. The problem itself is fairly simple and is useful for proof of neural network accuracy in classification problems, so further work may investigate other neural network training methods other than back-propagation.
 
-## Bibliography
+## References
 
 Dişken, Gökay. "Predicting Poker Hand’s Strength Wih Artificial Neural Networks." Adana Bilim Ve Teknoloji Üniversitesi (2014).
 
