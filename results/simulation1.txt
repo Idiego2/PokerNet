@@ -1,6 +1,4 @@
 hidden_neurons|learning_rate|max_epochs|activation|hits|mse
 10|0.001|100|purelin|0.50272|0.099456
-hidden_neurons|learning_rate|max_epochs|activation|hits|mse
 30|0.001|100|purelin|0.50272|0.099456
-hidden_neurons|learning_rate|max_epochs|activation|hits|mse
 50|0.001|100|purelin|0.50268|0.099464
